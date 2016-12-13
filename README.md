@@ -1,7 +1,6 @@
 # clean-architecture
 
-A Clean Architecture Project Structure
-
+This documents Made Tech Flavoured Clean Architecture.
 
 ## RSpec (RSpec specific test layout)
 

@@ -2,8 +2,10 @@
 
 This documents Made Tech Flavoured Clean Architecture.
 
-Clean Architecture is a variant of Hexagonal Architecture by Alistair Cockburn and,
-[BCE](https://www.amazon.com/Object-Oriented-Software-Engineering-Approach/dp/0201544350) by Ivar Jacobson
+Clean Architecture is a variant of [Hexagonal Architecture](http://alistair.cockburn.us/Hexagonal+architecture) by Alistair Cockburn and,
+[BCE](https://www.amazon.com/Object-Oriented-Software-Engineering-Approach/dp/0201544350) by Ivar Jacobson.
+
+The Made Tech flavour is a bit more relaxed in some areas than Hexagonal Architecture but more prescriptive than the basics of Clean Architecture and, at this time, we only have documentation about Ruby.
 
 ## RSpec (RSpec specific test layout)
 
@@ -37,7 +39,14 @@ Each use case should be Framework and Database agnostic.
 * They are aware of the interface of the Gateways and Domain objects
 * They expose a request/response interface which are defined as simple data structures (Hashes or Structs)
 
-In 
+#### Alternative names
+
+* In Ivar Jacobson's BCE architecture these are the "Controls" #
+* In Uncle Bob's terminology these are "Interactors".
+* "Operations"
+" "Commands"
+
+In Made Tech Flavour Clean Architecture we stick to "UseCases"
 
 ### domain/
 

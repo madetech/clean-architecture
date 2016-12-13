@@ -33,7 +33,7 @@ Contains "complex" test doubles
 * All customer code should be housed within a Client namespace e.g. ```AcmeIndustries::Financial::UseCase::CreateInvoice```
 * All non-customer specfic code should be housed within a MadeTech namespace e.g. ```MadeTech::Authentication::UseCase::Login```
 
-### use_case/ [Use Cases](UseCases.md)
+### [Use Cases](UseCases.md) use_case/ 
 
 ### domain/
 

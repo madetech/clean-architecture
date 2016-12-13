@@ -2,6 +2,9 @@
 
 This documents Made Tech Flavoured Clean Architecture.
 
+Clean Architecture is a variant of Hexagonal Architecture by Alistair Cockburn and,
+[BCE](https://www.amazon.com/Object-Oriented-Software-Engineering-Approach/dp/0201544350) by Ivar Jacobson
+
 ## RSpec (RSpec specific test layout)
 
 ### spec/acceptance
@@ -30,7 +33,11 @@ Contains "complex" test doubles
 
 ### use_case/
 
-These contain the "Interactor", the Use Cases Framework and Database agnostic code
+Each use case should be Framework and Database agnostic. 
+* They are aware of the interface of the Gateways and Domain objects
+* They expose a request/response interface which are defined as simple data structures (Hashes or Structs)
+
+In 
 
 ### domain/
 

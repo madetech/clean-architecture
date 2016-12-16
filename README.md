@@ -22,7 +22,7 @@ Each use case should be Framework and Database agnostic.
 * "Operations"
 * "Commands"
 
-In Made Tech Flavour Clean Architecture we stick to the name "UseCases"
+In Made Tech Flavour Clean Architecture we stick to the name "UseCase"
 
 # Domain 
 

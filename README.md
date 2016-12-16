@@ -7,39 +7,10 @@ Clean Architecture is a variant of [Hexagonal Architecture](http://alistair.cock
 
 The Made Tech flavour is a bit more relaxed in some areas than Hexagonal Architecture but more prescriptive than the basics of Clean Architecture and, at this time, we only have documentation about Ruby.
 
-## RSpec (RSpec specific test layout)
+# Languages
 
-### spec/acceptance
-
-Contains end-to-end acceptance specs, without the Web Delivery mechanism
-These specs call the interface that the Web Delivery mechanism uses
-
-### spec/unit
-
-Contains unit specs
-
-### spec/fixtures
-
-Contains raw fixtures
-
-### spec/test_doubles
-
-Contains "complex" test doubles
-
-## Production Code
-
-### (lib|src)/<insert customer name here>/**
-
-* All customer code should be housed within a Client namespace e.g. ```AcmeIndustries::Financial::UseCase::CreateInvoice```
-* All non-customer specfic code should be housed within a MadeTech namespace e.g. ```MadeTech::Authentication::UseCase::Login```
-
-### [Use Cases](UseCases.md) use_case/ 
-
-### domain/
-
-These contain the "Entity" objects
-
-### gateway/
-
-Contains IO adapters (e.g. files, database or API calls)
-These construct Domain objects for use by Use Cases, and, save Domain objects given to it
+* [Ruby](ruby/README.md)
+* [Go](go/README.md) 
+* [Clojure](clojure/README.md)
+* [JS](js/README.md)
+* [Kotlin](kotlin/README.md)

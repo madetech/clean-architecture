@@ -7,7 +7,31 @@ Clean Architecture is a variant of [Hexagonal Architecture](http://alistair.cock
 
 The Made Tech flavour is a bit more relaxed in some areas than Hexagonal Architecture but more prescriptive than the basics of Clean Architecture and, at this time, we only have documentation about Ruby.
 
-# Languages
+# Use Cases
+
+Each use case should be Framework and Database agnostic. 
+* They are aware of the interface of the Gateways and Domain objects
+* They expose a request/response interface which are defined as simple data structures (Hashes or Structs)
+
+## Alternative names
+
+* In Ivar Jacobson's BCE architecture these are the "Controls"
+* In Uncle Bob's terminology these are "Interactors".
+* "Operations"
+* "Commands"
+
+In Made Tech Flavour Clean Architecture we stick to the name "UseCases"
+
+# Domain 
+
+These contain the "Entity" objects
+
+# Gateways
+
+Contains IO adapters (e.g. files, database or API calls)
+These construct Domain objects for use by Use Cases, and, save Domain objects given to it
+
+# Examples in Languages
 
 * [Ruby](ruby/README.md)
 * [Go](go/README.md) 

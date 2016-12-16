@@ -1,5 +1,7 @@
 # Made Tech Flavour Clean Architecture: Ruby
 
+![Ruby Clean Architecture](clean-architecture.png)
+
 ## Testing 
 * [RSpec](RSpec.md) (RSpec specific test layout)
 

@@ -15,3 +15,23 @@ Each use case should be Framework and Database agnostic.
 " "Commands"
 
 In Made Tech Flavour Clean Architecture we stick to "UseCases"
+
+## Libraries
+
+* [Deject](https://github.com/JoshCheek/deject)
+
+## Example
+
+```ruby
+module AcmeIndustries
+  module Widget
+    module UseCase
+      class WidgetsPerFooBarReport
+        Deject self, :widget_gateway
+        
+        def execute
+      end
+    end
+  end
+end
+```

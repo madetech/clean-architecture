@@ -1,4 +1,8 @@
-# clean-architecture
+---
+title: Clean Architecture
+---
+
+# Clean Architecture
 
 ![Clean Architecture](https://8thlight.com/blog/assets/posts/2012-08-13-the-clean-architecture/CleanArchitecture-8b00a9d7e2543fa9ca76b81b05066629.jpg)
 

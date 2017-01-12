@@ -9,6 +9,10 @@ Clean Architecture is a variant of [Hexagonal Architecture](http://alistair.cock
 
 The Made Tech flavour is a bit more relaxed in some areas than Hexagonal Architecture but more prescriptive than the basics of Clean Architecture and, at this time, we only have documentation about Ruby.
 
+# Long-term learning guide
+
+We're beginning to put together a [long-term learning guide](learn/README.md) for Clean Architecture.
+
 # Use Cases
 
 Each use case should be Framework and Database agnostic. 

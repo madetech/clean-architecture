@@ -19,7 +19,7 @@ Clean Architecture works best when all programmers share the same mindset, or at
 In extension to the Agile manifesto, clean architecture's core values and beliefs can be summarized:
 
 * Code rots and becomes a big ball of mud because programmers fear changing the code, and that 
-* good testing strategy underpins removing this fear, and this approach is supported by Clean Architecture.
+* good testing strategy [(semantic stability)](https://www.madetech.com/blog/semantically-stable-test-suites) underpins removing this fear, and this approach is supported by Clean Architecture.
 * Any aspect of the codebase should be considered opportunity for refactoring at any time.
 * The SOLID and Package principles are core guiding principles used to determine the Clean Architecture paradigm.
 

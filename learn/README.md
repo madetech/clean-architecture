@@ -4,7 +4,7 @@
 
 A common number used to determine how much effort is required to become an expert is 10,000 hours of practice.
 
-It cannot be any type of practice: you cannot swing a golf club for 10,000 hours and become as good as Tiger Wood.
+It cannot be any type of practice: you cannot swing a golf club for 10,000 hours and become as good as Tiger Woods.
 
 "Practice" must be:
 * Deliberate and goal directed
@@ -19,9 +19,9 @@ Clean Architecture works best when all programmers share the same mindset, or at
 In extension to the Agile manifesto, clean architecture's core values and beliefs can be summarized:
 
 * Code rots and becomes a big ball of mud because programmers fear changing the code, and that 
-* Good testing strategy underpins removing this fear, and this approach is supported by Clean Architecture.
-* Any aspect of the codebase should be considered opportunity for refactoring at any time
-* The SOLID and Package principles are core guiding principles used to determine the Clean Architecture paradigm
+* good testing strategy underpins removing this fear, and this approach is supported by Clean Architecture.
+* Any aspect of the codebase should be considered opportunity for refactoring at any time.
+* The SOLID and Package principles are core guiding principles used to determine the Clean Architecture paradigm.
 
 ## Core Skills
 

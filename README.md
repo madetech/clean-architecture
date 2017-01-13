@@ -11,7 +11,8 @@ The Made Tech flavour is a bit more relaxed in some areas than Hexagonal Archite
 
 # Long-term learning guide
 
-We're beginning to put together a [long-term learning guide](learn/README.md) for Clean Architecture.
+We're beginning to put together [long-term learning goals](learn/README.md) for Clean Architecture, which individuals
+can use to help provide some direction to areas which are required in order to be proficient at Clean Architecture.
 
 # Use Cases
 

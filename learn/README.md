@@ -14,7 +14,7 @@ It cannot be any type of practice: you cannot swing a golf club for 10,000 hours
 
 ## Values & Beliefs
 
-Clean Architecture works best when all programmers share the same mindset, or at the very least understand and apply it's mindset.
+Clean Architecture works best when all programmers share the same mindset, or at the very least understand and apply its mindset.
 
 In extension to the Agile manifesto, clean architecture's core values and beliefs can be summarized:
 

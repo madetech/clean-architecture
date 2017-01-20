@@ -1,8 +1,16 @@
 # Made Tech Flavour Clean Architecture: Kotlin 
 
+Example project: [MLD Klean Architecture (Continuous Feedback)](https://github.com/madetech/dojos/tree/67eb97d93135ae0fc54bada70e2d2656f7873b88/mld-klean-architecture)
 
-## Testing 
-* [Spek](Spek.md) (Spek specific test layout)
+## [Testing](../learn/ATDD.md)
+### Spek
+
+#### Acceptance Test
+An executing [example can be found here](https://github.com/madetech/dojos/blob/67eb97d93135ae0fc54bada70e2d2656f7873b88/mld-klean-architecture/src/test/kotlin/io/continuousfeedback/core/test/acceptance/TeamNotificationsSpec.kt).
+
+#### Unit Test
+An executing [example can be found here](https://github.com/madetech/dojos/blob/67eb97d93135ae0fc54bada70e2d2656f7873b88/mld-klean-architecture/src/test/kotlin/io/continuousfeedback/core/test/unit/CreateTeamMemberSpec.kt).
+
 
 ## Production Code
 

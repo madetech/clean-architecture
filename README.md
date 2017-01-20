@@ -31,7 +31,18 @@ In Made Tech Flavour Clean Architecture we stick to the name "UseCase"
 
 # Domain 
 
-These contain the "Entity" objects
+Domain objects are the center of your system. 
+Their purpose is to model the domain, in the Object-Oriented world.
+
+The challenge is determining what behaviours lie within Domain objects, and what behaviours lie within Use Cases.
+
+A good rule of thumb is that behaviours within Domain objects *must be valid for all Use Cases across the system.*
+
+It is cheaper to specialise Use Cases, resulting in an anemic domain model, then evolve the systems towards generalisations once patterns emerge.
+
+## Alternative names
+
+* Entities
 
 # Gateways
 

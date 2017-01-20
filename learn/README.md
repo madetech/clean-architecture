@@ -11,6 +11,7 @@ A common number used to determine how much effort is required to become an exper
 It cannot be any type of practice: you cannot swing a golf club for 10,000 hours and become as good as Tiger Woods.
 
 "Practice" must be:
+
 * Deliberate and goal directed
 * Include opportunity for:
     * Self-reflection

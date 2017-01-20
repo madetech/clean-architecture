@@ -23,6 +23,10 @@ In extension to the Agile manifesto, clean architecture's core values and belief
 * Any aspect of the codebase should be considered opportunity for refactoring at any time.
 * The SOLID and Package principles are core guiding principles used to determine the Clean Architecture paradigm.
 
+## Other guides
+
+* [ATDD](ATDD.md)
+
 ## Core Skills
 
 * Able to describe 

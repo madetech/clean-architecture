@@ -58,7 +58,7 @@ Gateways are I/O source specific e.g. ActiveRecord, Sequel, MySQL, Paypal, FileS
 # Examples in Languages
 
 * [Ruby](ruby/README.md)
-* [Go](go/README.md) 
-* [Clojure](clojure/README.md)
-* [JS](js/README.md)
 * [Kotlin](kotlin/README.md)
+* Go 
+* Clojure
+* JS

@@ -1,6 +1,28 @@
 require 'active_support/core_ext/hash/reverse_merge'
 require 'active_model'
 require 'action_view'
+require 'ostruct'
+
+class ApplicationController
+  class Params < OpenStruct
+    def require(name)
+      to_h
+    end
+  end
+
+  def params=(params)
+    @params = Params.new(params)
+  end
+
+  def params
+    @params
+  end
+
+  def user_instance_var
+    @user
+  end
+end
+
 
 class View
   include ActionView::Helpers::FormHelper
@@ -26,6 +48,11 @@ module Spree
 
   class User
     include ActiveModel::Model
+
+    def self.create(attrs)
+      new(attrs).tap(&:valid?)
+    end
+
     attr_reader :email
     validates :email, presence: true
 

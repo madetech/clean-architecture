@@ -81,4 +81,6 @@ class FakeGateway
   end
 end
 
-Dir[__dir__ + '/../{lib,app}/**/*.rb'].each { |f| require f }
+require_relative '../lib/apply_order_discount'
+require_relative '../lib/register_user'
+require_relative '../app/controllers/user_registration_controller'

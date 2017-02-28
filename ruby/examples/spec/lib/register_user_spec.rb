@@ -6,13 +6,11 @@ describe RegisterUser do
 
   context 'when user created without errors' do
     let(:email) { 'a@a.com' }
-    it { expect(subject.values).to include(email: email) }
     it { expect(subject.errors).to be_empty }
   end
 
   context 'when user has errors' do
     let(:email) { nil }
-    it { expect(subject.values).to include(email: email) }
     it { expect(subject.errors).to_not be_empty }
   end
 end

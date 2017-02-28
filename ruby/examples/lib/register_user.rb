@@ -1,6 +1,6 @@
 class RegisterUser
   Request = Struct.new(:email, :name, :password)
-  Response = Struct.new(:values, :errors)
+  Response = Struct.new(:errors)
 
   attr_reader :gateway
 
@@ -10,7 +10,7 @@ class RegisterUser
 
   def register(request)
     errors = gateway.create_user(request.to_h)
-    Response.new(request.to_h, errors)
+    Response.new(errors)
   end
 
   class Gateway

@@ -23,7 +23,6 @@ class ApplicationController
   end
 end
 
-
 class View
   include ActionView::Helpers::FormHelper
 

@@ -43,7 +43,19 @@ class View
 end
 
 module Spree
-  class Order; end
+  class Order
+    def self.find(id)
+      new
+    end
+
+    def discount
+      10
+    end
+
+    def update!(attrs)
+      true
+    end
+  end
 
   class User
     include ActiveModel::Model

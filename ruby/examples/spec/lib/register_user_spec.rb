@@ -19,16 +19,22 @@ end
 
 describe RegisterUser::Gateway do
   context 'when create user' do
-    subject { described_class.new.create_user(email: 'luke@cool.com') }
+    subject do
+      described_class.new.create_user(
+        email: email,
+        name: 'Luke',
+        password: 'pass'
+      )
+    end
 
-    context 'and no errors' do
-      before { allow(Spree::User).to receive(:create) { double(errors: []) } }
+    context 'with valid email' do
+      let(:email) { 'luke@cool.com' }
       it { is_expected.to be_empty }
     end
 
-    context 'and errors' do
-      before { allow(Spree::User).to receive(:create) { double(errors: [:cool]) } }
-      it { is_expected.to include(:cool) }
+    context 'with missing email' do
+      let(:email) { nil }
+      it { is_expected.to_not be_empty }
     end
   end
 end

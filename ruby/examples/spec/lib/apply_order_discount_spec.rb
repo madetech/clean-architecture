@@ -29,7 +29,6 @@ end
 
 describe ApplyOrderDiscount::Gateway do
   context 'when finding order by id' do
-    before { allow(Spree::Order).to receive(:find) { double(discount: 10) } }
     subject { described_class.new.find_order_by_id(1) }
 
     it { is_expected.to be_a(ApplyOrderDiscount::DiscountableOrder) }
@@ -41,7 +40,6 @@ describe ApplyOrderDiscount::Gateway do
   end
 
   context 'when saving order discount' do
-    before { expect(Spree::Order).to receive(:find) { double(update!: true) } }
     subject { described_class.new.save_order_discount(1, ApplyOrderDiscount::DiscountableOrder.new(10)) }
     it { is_expected.to eq(true) }
   end

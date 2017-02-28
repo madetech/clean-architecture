@@ -1,5 +1,3 @@
-require_relative '../lib/register_user_with_form'
-
 describe RegisterUserWithForm do
   let(:email) { 'a@a.com' }
 

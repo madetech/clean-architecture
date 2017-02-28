@@ -1,5 +1,3 @@
-require_relative '../lib/register_user'
-
 describe RegisterUser do
   subject do
     register_user = described_class.new(gateway: FakeGateway.new)

@@ -1,5 +1,3 @@
-require_relative '../lib/apply_order_discount'
-
 describe ApplyOrderDiscount do
   let(:gateway) { double(find_order_by_id: order, save_order_discount: true) }
   subject { described_class.new(gateway: gateway).apply(double(id: 1)) }

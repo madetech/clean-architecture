@@ -42,3 +42,5 @@ class FakeGateway
     Spree::User.new(attrs).tap(&:valid?).errors
   end
 end
+
+Dir[__dir__ + '/../{lib,app}/**/*.rb'].each { |f| require f }

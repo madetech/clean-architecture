@@ -81,6 +81,11 @@ class FakeGateway
   end
 end
 
-require_relative '../lib/apply_order_discount'
-require_relative '../lib/register_user'
+require_relative '../lib/orders/domain/discountable_order'
+require_relative '../lib/orders/gateway/order'
+require_relative '../lib/orders/use_case/apply_order_discount'
+
+require_relative '../lib/users/gateway/user'
+require_relative '../lib/users/use_case/register_user'
+
 require_relative '../app/controllers/user_registration_controller'

@@ -5,19 +5,6 @@ title: Learning Clean Architecture
 
 # Learning Clean Architecture
 
-## Learning
-
-A typical number used to determine how much effort is required to become an expert is 10,000 hours of practice.
-
-It cannot be any practice, however, i.e. you cannot swing a golf club for 10,000 hours and become as good as Tiger Woods.
-
-"Practice" must be:
-
-* Deliberate and goal directed
-* Include the opportunity for:
-    * Self-reflection
-    * Feedback
-
 ## Values 
 
 Clean Architecture works best when all programmers share the same mindset, or at the very least understand and apply its mindset.
@@ -41,7 +28,20 @@ the right, we value the items on the left more.*
 * Applying a sound strategy for preventing the introduction of defects, such as TDD, unpins eliminating fear. [(semantic stability)](https://www.madetech.com/blog/semantically-stable-test-suites) 
 * Refactoring can occur at any time when there is no fear
 * When the team understanding of the domain improves, keeping the in-code model of the domain up to date is important.
-* The SOLID and package principles provide a guide to aid good software design  
+* The SOLID and package principles provide a guide to aid good software design 
+
+## Learning
+
+A typical number used to determine how much effort is required to become an expert is 10,000 hours of practice.
+
+It cannot be any practice, however, i.e. you cannot swing a golf club for 10,000 hours and become as good as Tiger Woods.
+
+"Practice" must be:
+
+* Deliberate and goal directed
+* Include the opportunity for:
+    * Self-reflection
+    * Feedback
 
 ## Other guides
 

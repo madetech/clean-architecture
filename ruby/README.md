@@ -1,3 +1,7 @@
+---
+title: Clean Architecture: Ruby
+---
+
 # Made Tech Flavour Clean Architecture: Ruby
 
 ![Ruby Clean Architecture](clean-architecture.png)

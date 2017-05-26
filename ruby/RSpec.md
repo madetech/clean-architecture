@@ -1,3 +1,7 @@
+---
+title: Clean Architecture Ruby: RSpec
+---
+
 # RSpec ATDD Structure
 
 ## spec/acceptance

@@ -1,3 +1,7 @@
+---
+title: Clean Architecture Ruby: Use Cases
+---
+
 # Use Cases
 
 Standard Directory: use_case/

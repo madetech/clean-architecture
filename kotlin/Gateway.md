@@ -1,5 +1,5 @@
 ---
-title: Clean Architecture Ruby: Gateway
+title: Clean Architecture: Kotlin Gateway
 ---
 
 # Gateway

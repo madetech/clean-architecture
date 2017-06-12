@@ -51,85 +51,83 @@ It cannot be any practice, however, i.e. you cannot swing a golf club for 10,000
 
 Measure your skills in each of these areas as: can describe, can identify, can implement.
 
-0. Programming
-  - OO Language Features
-    - Polymorphism
-    - Encapsulation
-    - Composition
-    - Abstract class
-    - Inheritance
-    - Reference and value types
-    - Static
-    - Overriding
-    - Exceptions
-    - Interface*
-    - Concrete class*
-    - Generics*
-  - SOLID Principles
-    - Single responsibility principle
-    - Open closed principle
-    - Liskov substitution principle
-    - Interface segregation principle
-    - Dependency inversion principle
-  - Package Principles
-    - Cohesion
-      - Reuse-release equivalence principle
-      - Common-reuse principle
-      - Common-closure principle
-    - Coupling
-      - Acyclic dependencies principle
-      - Stable-dependencies principle
-      - Stable-abstractions principle
-  - Design patterns
-  - Static type systems
-    - Using as advantage rather than hindrance
-    - Stringly-typing in these languages
-  - Dynamic type systems
-    - Playing to strengths
-    - Avoiding not so obvious smells
-  - Editing code
-    - Refactoring tools
-    - Regex replacers
-  - Professionalism
-    - Thinking as a Team
-    - Easily identify potential for merge conflicts, without looking at the code
-    - Sharing knowledge (pair programming)
-1. Testing
-  - Code coverage
-  - Semantic Stability
-  - Mutation Testing
-  - Acceptance testing
-    - Code
-    - Cucumber
-    - Fitnesse
-    - When to use Code vs Cucumber/Fitnesse?
-  - Acceptance-tests-as-a-UI 
-  - Transformation Priority Premise
-  - Designing your public API
-  - Recognizing the difference between necessary & unnecessary null-step (wiring & boilerplate)
-  - Degenerate test cases
-  - 
-2. Clean Architecture   
-  - Presenter pattern (asyncronous)
-  - Request/response pattern (syncronous)
-  - Domain-Driven-Design
-    - Creating generalisations using Domain objects
-3. Lightweight-analysis
-  - Determine users needs
-    - Wireframes
-    - Seams
-      - Existing UI
-      - Delivery Mechanism
-  - UI-agnostic Use Case
-    - Input data structure
-    - Output data structure
-    - What Domain objects are likely required
-    - What collaborators are likely required
-  - Committing to a first slice
-    - Good incision points
-      - Testing assumptions & Risks
-      - Delivering quick wins
-    - Considering your next move
-4. Mentoring
-  - Able to mentor others
- 
+### 0. Programming
+- OO Language Features
+  - Polymorphism
+  - Encapsulation
+  - Composition
+  - Abstract class
+  - Inheritance
+  - Reference and value types
+  - Static
+  - Overriding
+  - Exceptions
+  - Interface*
+  - Concrete class*
+  - Generics*
+- SOLID Principles
+  - Single responsibility principle
+  - Open closed principle
+  - Liskov substitution principle
+  - Interface segregation principle
+  - Dependency inversion principle
+- Package Principles
+  - Cohesion
+    - Reuse-release equivalence principle
+    - Common-reuse principle
+    - Common-closure principle
+  - Coupling
+    - Acyclic dependencies principle
+    - Stable-dependencies principle
+    - Stable-abstractions principle
+- Design patterns
+- Static type systems
+  - Using as advantage rather than hindrance
+  - Stringly-typing in these languages
+- Dynamic type systems
+  - Playing to strengths
+  - Avoiding not so obvious smells
+- Editing code
+  - Refactoring tools
+  - Regex replacers
+- Professionalism
+  - Thinking as a Team
+  - Easily identify potential for merge conflicts, without looking at the code
+  - Sharing knowledge (pair programming)
+### 1. Testing
+- Code coverage
+- Semantic Stability
+- Mutation Testing
+- Acceptance testing
+  - code
+  - cucumber
+  - fitnesse
+  - When to use Code vs Cucumber/Fitnesse?
+- Acceptance-tests-as-a-UI
+- Transformation Priority Premise
+- Designing your public API
+- Recognizing the difference between necessary & unnecessary null-step (wiring & boilerplate)
+- Degenerate test cases
+### 2. Clean Architecture
+- Presenter pattern (asyncronous)
+- Request/response pattern (syncronous)
+- Domain-Driven-Design
+  - Creating generalisations using Domain objects
+### 3. Lightweight-analysis
+- Determine users needs
+- Wireframes
+- Seams
+  - Existing UI
+  - Delivery Mechanism
+- UI-agnostic Use Case
+- Input data structure
+- Output data structure
+- What Domain objects are likely required
+- What collaborators are likely required
+- Committing to a first slice
+- Good incision points
+  - Testing assumptions & Risks
+  - Delivering quick wins
+- Considering your next move
+### 4. Mentoring
+- Able to mentor others

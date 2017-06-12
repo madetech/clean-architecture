@@ -47,87 +47,89 @@ It cannot be any practice, however, i.e. you cannot swing a golf club for 10,000
 
 * [ATDD](ATDD.md)
 
-## Core Skills
+## Skills
 
-* Able to describe 
-    - OO language features
-    - the responsibility of each organising component of a clean architecture 
-    - SOLID principles
-    
-* Able to identify 
-    - OO language features
-    - the core organising components of a clean architecture in a code base
-    - concrete examples where the forces of the SOLID and Package principles are at play
-    
-* Able to implement and use in code
-    - OO language features
-    - all the core organising components of a clean architecture
-    - the SOLID principles as a tool to help guide the shape of your architecture
-    - the Package principles as a tool to help guide the organisation of your packages
-    
-# Clean Architecture skill-set 
+Measure your skills in each of these areas as: can describe, can identify, can implement.
 
-* Able to perform analysis of potential use case(s) 
-    * Determine an order to work through use case(s) that will test the most assumptions
-    * Determine input data structure 
-    * Determine output data structure
-    * Determine which Domain object(s) are potentially required
-    * Determine potential interface of any collaborator(s)
-* Able to perform analysis of appropriate use of asynchronous vs synchronous use cases
-* Able to use type systems to aid construction, refactoring and robustness (rather than primarily a hindrance)
-* Able to make use of IDE refactoring tools to aid refactoring and construction
-* Able to apply TDD to provide the basis of a good testing strategy
-    * Able to apply ATDD to provide extra robustness and a customer-goal-oriented testing approach
-* Able to recognise recurring themes of the development process, and the common challenges faced in each
-    * Null-step (wiring and boilerplate)
-    * Degenerate cases
-    * Passing the first acceptance test
-    * Creating your second use case
-    * Creating generalisations
-    * ...
-* Able to support and mentor others in recurring themes of the development process
-* Be able to (self-)organise/communicate with other teams also writing code in the same parts of the system
-
-# Object-oriented principles 
-
-Below is a list of OO tools & skills that are non-specific to Clean Architecture. 
-
-It is ideal if you have knowledge of how each of these works in your language of choice (assuming it supports the listed language feature).
-
-* OO
-    * Polymorphism
-    * Encapsulation
-    * Composition
-    * Abstract class
-    * Inheritance
-    * Reference and value types
-    * Static
-    * Overriding
-    * Exceptions
-    
-* Type-safe OO: 
-    * Interface
-    * Concrete class
-    * Generics
-
-### Principles of Object-oriented programming
-
-These are widely accepted as the forces at play when developing OO software. While there is opposition to that, we 
-assume when building Cleanly architected systems, that they hold true.
-
-* SOLID principles
-    * Single responsibility principle
-    * Open closed principle
-    * Liskov substitution principle
-    * Interface segregation principle
-    * Dependency inversion principle
-
-* Package principles
-    * Cohesion
-        * Reuse-release equivalence principle
-        * Common-reuse principle
-        * Common-closure principle
-    * Coupling
-        * Acyclic dependencies principle
-        * Stable-dependencies principle
-        * Stable-abstractions principle
+0. Programming
+  - OO Language Features
+    - Polymorphism
+    - Encapsulation
+    - Composition
+    - Abstract class
+    - Inheritance
+    - Reference and value types
+    - Static
+    - Overriding
+    - Exceptions
+    - Interface*
+    - Concrete class*
+    - Generics*
+  - SOLID Principles
+    - Single responsibility principle
+    - Open closed principle
+    - Liskov substitution principle
+    - Interface segregation principle
+    - Dependency inversion principle
+  - Package Principles
+    - Cohesion
+      - Reuse-release equivalence principle
+      - Common-reuse principle
+      - Common-closure principle
+    - Coupling
+      - Acyclic dependencies principle
+      - Stable-dependencies principle
+      - Stable-abstractions principle
+  - Design patterns
+  - Static type systems
+    - Using as advantage rather than hindrance
+    - Stringly-typing in these languages
+  - Dynamic type systems
+    - Playing to strengths
+    - Avoiding not so obvious smells
+  - Editing code
+    - Refactoring tools
+    - Regex replacers
+  - Professionalism
+    - Thinking as a Team
+    - Easily identify potential for merge conflicts, without looking at the code
+    - Sharing knowledge (pair programming)
+1. Testing
+  - Code coverage
+  - Semantic Stability
+  - Mutation Testing
+  - Acceptance testing
+    - Code
+    - Cucumber
+    - Fitnesse
+    - When to use Code vs Cucumber/Fitnesse?
+  - Acceptance-tests-as-a-UI 
+  - Transformation Priority Premise
+  - Designing your public API
+  - Recognizing the difference between necessary & unnecessary null-step (wiring & boilerplate)
+  - Degenerate test cases
+  - 
+2. Clean Architecture   
+  - Presenter pattern (asyncronous)
+  - Request/response pattern (syncronous)
+  - Domain-Driven-Design
+    - Creating generalisations using Domain objects
+3. Lightweight-analysis
+  - Determine users needs
+    - Wireframes
+    - Seams
+      - Existing UI
+      - Delivery Mechanism
+  - UI-agnostic Use Case
+    - Input data structure
+    - Output data structure
+    - What Domain objects are likely required
+    - What collaborators are likely required
+  - Committing to a first slice
+    - Good incision points
+      - Testing assumptions & Risks
+      - Delivering quick wins
+    - Considering your next move
+4. Mentoring
+  - Able to mentor others
+ 

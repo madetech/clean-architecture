@@ -11,9 +11,11 @@ This documents Made Tech Flavoured [Clean Architecture](https://8thlight.com/blo
 * [Gateway](gateway.md)
 * [Bounded Contexts](bounded_contexts.md)
 
-## Learn
+## Learn by example (Ruby)
 
 The best way to learn Clean Architecture is through deliberate practice.
+
+*(Work-in-progress)*
 
 ### Basics
 

@@ -20,7 +20,7 @@ The best way to learn Clean Architecture is through deliberate practice.
 * [The Mindset](learn/the-mindset.md)
 * [Start with Acceptance Testing](learn/basics/start-with-acceptance.md)
 * [Writing Fake Gateways](learn/basics/fake-gateways.md)
-* [Use Cases organise your code](learn/basics/use-cases-organise.md]
+* [Use Cases organise your code](learn/basics/use-cases-organise.md)
 * [Constructors are for collaborators](learn/basics/constructors-for-collaborators.md)
 * [Don't leak your internals!](learn/basics/do-not-leak-your-internals.md)
 * [TDD everything](learn/basics/tdd-everything.md)

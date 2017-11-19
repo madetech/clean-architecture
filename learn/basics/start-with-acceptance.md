@@ -8,7 +8,7 @@ Here, we're going to be describing something that looks like the A in [ATDD](htt
 
 ## What is an acceptance test?
 
-It is a high-level set of tests, written from the perspective of the user, showing clear steps through the step.
+It is a high-level set of tests, written from the perspective of the user, describing steps through the system, and expectations along the way.
 
 In BDD the behaviour of the system might be defined light so: 
 

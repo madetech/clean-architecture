@@ -18,7 +18,7 @@ When I turn the light on
 Then the light is on
 ```
 
-Here is the same Cumcumber script written as RSpec Ruby:
+Here is the same Cucumber script written as RSpec Ruby:
 
 ```ruby
 describe 'lighting' do

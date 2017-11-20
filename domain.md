@@ -11,6 +11,18 @@ A good rule of thumb is that behaviours within Domain objects *must be valid for
 
 It is cheaper to specialise Use Cases, resulting in an anemic domain model, then evolve the systems towards generalisations once patterns emerge.
 
+In this code we have a simple Domain object
+
+```ruby
+class Light
+   attr_reader :brightness
+
+   def initialize(brightness:)
+     @brightness = brightness
+   end
+end
+```
+
 ## Alternative Names
 
 * Entities 

@@ -70,7 +70,7 @@ We do not want to
 
 ### What should an acceptance test suite test?
 
-If we understand that tests have three components: **Arrange**-**Act**-**Assert**, we want to understand understand what should be exercised in each step.
+Tests have three components: **Arrange**-**Act**-**Assert**, lets look at what should be exercised in each step.
 
 Let's examine each in reverse order
 

@@ -113,18 +113,28 @@ context 'when I turn the light on' do
 end
 ```
 
-Beware of specifying the needs of your customer in API tests (e.g. Rails feature-spec). Let me explain how the Single Responsibility Principle manifests itself in Acceptance Testing.
+
+##### From the trenches
+Beware of specifying the needs of your customer in API tests (e.g. Rails feature-spec). 
+
+Let me explain how the Single Responsibility Principle manifests itself in Acceptance Testing.
 
 Tightly coupling descriptions of what your customer needs to your HTTP-stack can cause code churn on your acceptance tests for technical reasons, not domain reasons. For example, a cookie might need to be set, or a new version of HTTP/Ajax/JS requires some _sort of widget to be reticulated_.
 
 It is hard to concentrate on two problems at once. If you are changing a test suite because some _spline needs reticulating in your HTTP SPDY Headers_, are you going to be focussing on the fine points of your customer's domain? 
 
-Could you potentially introduce a hole in your test suite inadvertently?
+Could you potentially introduce a hole in your test suite inadvertently? In any moderate-to-complex system that risk is higher than you probably expect.
 
 Acceptance Tests specify the needs of the customer, nothing more or less. 
 
-Separate the concerns both in Production Code and your Test Code.
+Separate the concerns both in Production Code and, most importantly, your Test Code.
 
 #### Arrange
 
-TBC
+Setting up your Acceptance Tests is one of the most difficult of the testing arts to become adept in. 
+
+In the simplest case, your "Arrange" step is merely a case of calling one or more use cases to get the system to the state you need. This is an example of the ideal world, this is what system designers should aim for.
+
+That said, while this is the ideal it may not be practical or possible.
+
+Aim to have your test setup code mimic how you'd expect your application to be used by it's delivery mechanism.

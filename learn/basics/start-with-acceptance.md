@@ -143,7 +143,7 @@ Aim to have your test setup code mimic how you'd expect your application to be u
 
 Gherkin (Cucumber/SpecFlow) and Fitnesse are common DSL choices for writing executable acceptance tests.
 
-If you are involving your (non-programmer) stakeholders in creation and verification of acceptance tests, you should probably use a DSL. If you are not doing this, use code. 
+If you are involving your (non-programmer) stakeholders in creation and verification of acceptance tests, you should probably use a DSL. If you are not doing this, use code, but try to still use human-readable language. 
 
 ```Gherkin
 Feature: An customer places an order

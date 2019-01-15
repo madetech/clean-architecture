@@ -138,3 +138,26 @@ In the simplest case, your "Arrange" step is merely a case of calling one or mor
 That said, while this is the ideal it may not be practical or possible.
 
 Aim to have your test setup code mimic how you'd expect your application to be used by it's delivery mechanism.
+
+## Should we use Code or a Domain Specific Language?
+
+Gherkin (Cucumber/SpecFlow) and Fitnesse are common DSL choices for writing executable acceptance tests.
+
+If you are involving your (non-programmer) stakeholders in creation and verification of acceptance tests, you should probably use a DSL. If you are not doing this, use code, but try to still use human-readable language. 
+
+```Gherkin
+Feature: An customer places an order
+
+Scenario: An existing customer places an order
+Given an existing customer
+And a valid UK billing address
+And a valid UK shipping address
+And wants to buy 1x sku 19283
+When the order is placed
+Then the order is viewable
+And there is one line item
+And there is valid UK shipping address
+And there is a valid UK billing address
+And there is a line item for 1x sku 19283 for 10.00 GBP
+And the order total is 10.00 GBP
+```

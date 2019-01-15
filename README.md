@@ -1,6 +1,8 @@
 # Clean Architecture
 
-This documents Made Tech Flavoured [Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html) which is an implementation of Robert C. Martin's Clean Architecture.
+How to begin with "Made Tech Flavoured Clean Architecture". 
+
+This style of architecture has had many names over the years including "Hexagonal", "Ports & Adapters" and "Boundary-Control-Entity".
 
 # Getting started
 
@@ -56,12 +58,22 @@ The best way to learn Clean Architecture is through deliberate practice.
 
 # Further Reading
 
-Clean Architecture is a variant of [Hexagonal Architecture](http://alistair.cockburn.us/Hexagonal+architecture) by Alistair Cockburn and,
-[BCE](https://www.amazon.com/Object-Oriented-Software-Engineering-Approach/dp/0201544350) by Ivar Jacobson.
+[Clean Architecture](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html) by Robert C. Martin is extremely similar in nature to 
 
-The Made Tech flavour is a bit more relaxed in some areas than Hexagonal Architecture but more prescriptive than the basics of Clean Architecture and, at this time, we only have documentation about Ruby.
+* [BCE](https://www.amazon.com/Object-Oriented-Software-Engineering-Approach/dp/0201544350) by Ivar Jacobson and,
+* [Hexagonal Architecture](http://alistair.cockburn.us/Hexagonal+architecture) (also known as **Ports & Adapters**) by Alistair Cockburn.
+
+The Made Tech flavour is slightly different still to exactly what is described in [Robert C. Martin's book about Clean Architecture](https://www.amazon.co.uk/Clean-Architecture-Craftsmans-Software-Structure/dp/0134494164), the choice to rename certain basic concept is deliberate to aid:
+
+- Learning as a Junior 
+  - Relating Interactors (Robert's name for UseCase objects) to Use Case Analysis sessions
+  - Retaining an eye on Domain-Driven-Design i.e. What are Domain objects?
+  - Avoiding overloading terminology e.g. Entity (Robert's name for Domain Objects) with EntityFramework Entities
+
+You can think of the Made Tech flavour as being more relaxed than Hexagonal Architecture, but more prescriptive than the abstract concepts of Clean Architecture as described by Robert C. Martin's book.
 
 ## Reference
 
 * [Clean Coders videos](https://cleancoders.com/videos/clean-code)
 * [Clean Architecture Book](https://www.amazon.co.uk/Clean-Architecture-Craftsmans-Software-Structure/dp/0134494164/)
+

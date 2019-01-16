@@ -70,7 +70,7 @@ The Made Tech flavour is slightly different still to exactly what is described i
   - Retaining an eye on Domain-Driven-Design i.e. What are Domain objects?
   - Avoiding overloading terminology e.g. Entity (Robert's name for Domain Objects) with EntityFramework Entities
 
-You can think of the Made Tech flavour as being more relaxed than Hexagonal Architecture, but more prescriptive than the abstract concepts of Clean Architecture as described by Robert C. Martin's book.
+Made Tech flavour Clean Architecture is more [prescriptive than any of these other examples](learn/practicality.md)
 
 ## Reference
 

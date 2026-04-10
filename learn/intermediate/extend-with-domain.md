@@ -221,20 +221,51 @@ describe WholesaleCustomer do
 end
 ```
 
-The fake gateway shares `TIER_CONSTRUCTORS` with the real gateway so the same domain object types are exercised in tests and production:
+### Extracting a Builder
+
+The fake gateway needs access to the same construction logic as the real gateway. The approach above of referencing `SequelCustomerGateway::TIER_CONSTRUCTORS` directly creates a dependency from the fake onto the real — the fake now knows about a specific persistence implementation it should be unaware of.
+
+Extract the construction logic into a dedicated builder:
 
 ```ruby
+class CustomerBuilder
+  CONSTRUCTORS = {
+    'standard'  => ->(row) { StandardCustomer.new },
+    'premium'   => ->(row) { PremiumCustomer.new },
+    'wholesale' => ->(row) { WholesaleCustomer.new(account_manager_id: row[:account_manager_id]) }
+  }.freeze
+
+  def self.build(row)
+    constructor = CONSTRUCTORS.fetch(row[:tier], CONSTRUCTORS['standard'])
+    constructor.call(row)
+  end
+end
+```
+
+Both the real and fake gateway delegate to the builder — neither owns the construction logic, and neither depends on the other:
+
+```ruby
+class SequelCustomerGateway
+  def find(id)
+    row = @customers.where(id: id).first
+    CustomerBuilder.build(row)
+  end
+end
+
 class InMemoryCustomerGateway
   def find(id)
     @customers[id]
   end
 
-  def save(id:, tier:, **attrs)
-    constructor = SequelCustomerGateway::TIER_CONSTRUCTORS.fetch(tier, SequelCustomerGateway::TIER_CONSTRUCTORS['standard'])
-    @customers[id] = constructor.call(attrs)
+  def save(id:, **attrs)
+    @customers[id] = CustomerBuilder.build(attrs)
   end
 end
 ```
+
+Adding a new tier now means: a new domain class, one new entry in `CustomerBuilder::CONSTRUCTORS`. Nothing else changes — not the real gateway, not the fake, not any use case.
+
+The builder can also be tested independently to verify it produces the right type for each tier value.
 
 ## The guiding question
 

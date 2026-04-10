@@ -83,7 +83,9 @@ before do
 end
 ```
 
-Use cases that need to know who is acting receive the actor's identity as plain input data:
+### Passing the current user as input
+
+The simplest approach is to pass the actor's identity as a parameter to `execute`:
 
 ```ruby
 post '/orders' do
@@ -96,6 +98,77 @@ end
 ```
 
 The use case has no knowledge of tokens, headers, or sessions. It receives an ID and treats it as a fact.
+
+### Providing the current user as a gateway
+
+When many use cases in a system need to know who the current user is, threading `current_user_id:` through every `execute` call becomes noisy. An alternative is to provide the current user as a constructor dependency — the same pattern used for gateways.
+
+Define a simple current user object:
+
+```ruby
+class CurrentUser
+  attr_reader :id
+
+  def initialize(id)
+    @id = id
+  end
+end
+```
+
+Inject it into use cases that need it:
+
+```ruby
+class PlaceOrder
+  def initialize(order_gateway:, current_user:)
+    @order_gateway = order_gateway
+    @current_user = current_user
+  end
+
+  def execute(items:)
+    id = @order_gateway.save(customer_id: @current_user.id, items: items)
+    { order_id: id }
+  end
+end
+```
+
+The delivery mechanism constructs the `CurrentUser` after authentication and passes it into the [dependency factory](./keep-your-wiring-DRY.md):
+
+```ruby
+before do
+  # ... token verification ...
+  @current_user = CurrentUser.new(session[:user_id])
+end
+
+post '/orders' do
+  result = get_use_case(:place_order).execute(items: params[:items])
+  json(result)
+end
+```
+
+```ruby
+class Dependencies
+  def initialize(db:, current_user:)
+    @db = db
+    @current_user = current_user
+  end
+
+  def get_use_case(name)
+    case name
+    when :place_order
+      PlaceOrder.new(order_gateway: order_gateway, current_user: @current_user)
+    end
+  end
+end
+```
+
+In tests, inject a `CurrentUser` directly — no token, no session, no HTTP:
+
+```ruby
+let(:current_user) { CurrentUser.new(1) }
+let(:use_case) { PlaceOrder.new(order_gateway: InMemoryOrderGateway.new, current_user: current_user) }
+```
+
+Both approaches keep the use case free of authentication concerns. Choose whichever keeps the `execute` interface cleaner for your system.
 
 ## What must not live in the use case
 

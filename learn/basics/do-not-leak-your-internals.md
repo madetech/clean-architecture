@@ -60,4 +60,4 @@ A common scenario: you refactor `Order` to rename `customer_id` to `customer`. Y
 
 Had the use cases returned plain hashes, the change would have been contained inside the use case and gateway. The callers would have been untouched.
 
-The cost of the refactor just went from one file to six.
+The cost of the refactor just went from one file to six. Every additional file that needs to change is another opportunity to introduce a defect — a missed reference, a wrong field name, a test that was updated incorrectly and now passes for the wrong reason. The more code that moves, the more likely something breaks.

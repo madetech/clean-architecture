@@ -161,26 +161,34 @@ class PremiumCustomer
 end
 
 class WholesaleCustomer
+  def initialize(account_manager_id:)
+    @account_manager_id = account_manager_id
+  end
+
   def discount_rate
     0.6
   end
 end
 ```
 
-The gateway reads the `tier` column and constructs the right type:
+The gateway reads the `tier` column and constructs the right type. Two style points matter here:
+
+**Prefer a lookup hash over a case statement.** A case statement requires modifying existing code to add a new branch — it is closed to extension. A lookup hash is open to extension: adding a new tier means adding one entry to the hash, leaving existing entries untouched. It is also easier to scan.
+
+**Use constructor lambdas rather than calling `.new` on the class directly.** Different domain object types may have different constructor parameters — `WholesaleCustomer` needs an `account_manager_id` that `StandardCustomer` does not. Storing lambdas instead of classes keeps the call site uniform (`constructor.call(row)`) while letting each lambda pass exactly the data its type requires.
 
 ```ruby
 class SequelCustomerGateway
-  TIER_CLASSES = {
-    'standard'  => StandardCustomer,
-    'premium'   => PremiumCustomer,
-    'wholesale' => WholesaleCustomer
+  TIER_CONSTRUCTORS = {
+    'standard'  => ->(row) { StandardCustomer.new },
+    'premium'   => ->(row) { PremiumCustomer.new },
+    'wholesale' => ->(row) { WholesaleCustomer.new(account_manager_id: row[:account_manager_id]) }
   }.freeze
 
   def find(id)
     row = @customers.where(id: id).first
-    tier_class = TIER_CLASSES.fetch(row[:tier], StandardCustomer)
-    tier_class.new
+    constructor = TIER_CONSTRUCTORS.fetch(row[:tier], TIER_CONSTRUCTORS['standard'])
+    constructor.call(row)
   end
 end
 ```
@@ -199,7 +207,7 @@ class PlaceOrder
 end
 ```
 
-Adding a `VipCustomer` with a 50% discount rate requires a new class and one new line in the gateway's mapping. The use case, the `UpdateOrder` use case, and any other use case that prices orders are untouched.
+Adding a `VipCustomer` with a 50% discount rate requires a new class and one new entry in `TIER_CONSTRUCTORS`. The use case, `UpdateOrder`, and any other use case that prices orders are untouched.
 
 ### Testing
 
@@ -208,12 +216,12 @@ Each domain class is trivial to test in isolation:
 ```ruby
 describe WholesaleCustomer do
   it 'has a 40% discount rate' do
-    expect(described_class.new.discount_rate).to eq(0.6)
+    expect(described_class.new(account_manager_id: 1).discount_rate).to eq(0.6)
   end
 end
 ```
 
-The fake gateway used in acceptance tests can return domain objects by type directly, without a database:
+The fake gateway shares `TIER_CONSTRUCTORS` with the real gateway so the same domain object types are exercised in tests and production:
 
 ```ruby
 class InMemoryCustomerGateway
@@ -221,14 +229,12 @@ class InMemoryCustomerGateway
     @customers[id]
   end
 
-  def save(id:, tier:)
-    tier_class = SequelCustomerGateway::TIER_CLASSES.fetch(tier, StandardCustomer)
-    @customers[id] = tier_class.new
+  def save(id:, tier:, **attrs)
+    constructor = SequelCustomerGateway::TIER_CONSTRUCTORS.fetch(tier, SequelCustomerGateway::TIER_CONSTRUCTORS['standard'])
+    @customers[id] = constructor.call(attrs)
   end
 end
 ```
-
-By sharing the `TIER_CLASSES` mapping with the real gateway, the fake stays honest — the same domain object types are exercised in tests and production.
 
 ## The guiding question
 

@@ -1,3 +1,7 @@
+---
+title: Your first Delivery Mechanism
+---
+
 # Your first Delivery Mechanism
 
 A delivery mechanism is whatever sits between the outside world and your use cases. It receives an external event — an HTTP request, a CLI command, a message off a queue — and translates it into a use case call.

@@ -1,3 +1,7 @@
+---
+title: Authorisation
+---
+
 # Authorisation
 
 [Authentication](./authentication.md) answers "who are you?". Authorisation answers "what are you allowed to do?".

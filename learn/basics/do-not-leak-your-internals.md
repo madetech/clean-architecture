@@ -1,3 +1,7 @@
+---
+title: Don't leak your internals!
+---
+
 # Don't leak your internals!
 
 Use cases sit at the boundary of your application. Anything that crosses that boundary — both coming in and going out — should be a plain data structure.

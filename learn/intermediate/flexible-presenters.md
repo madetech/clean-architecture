@@ -1,3 +1,7 @@
+---
+title: Presenters are more flexible
+---
+
 # Presenters are more flexible
 
 Returning a hash from a use case is the right default. It is simple, easy to test, and works well for most situations.

@@ -1,3 +1,7 @@
+---
+title: Your first Real Gateway
+---
+
 # Your first Real Gateway
 
 Once you understand the domain well enough — and your acceptance tests are passing with a Fake — it is time to replace the Fake with a gateway that talks to a real persistence store.

@@ -1,3 +1,7 @@
+---
+title: Keep your wiring DRY
+---
+
 # Keep your wiring DRY
 
 Once you have a handful of use cases and real gateways, you will notice a pattern: every delivery mechanism constructs the same dependencies over and over.

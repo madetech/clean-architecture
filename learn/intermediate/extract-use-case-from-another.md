@@ -1,3 +1,7 @@
+---
+title: Extracting a Use Case from a Use Case
+---
+
 # Extracting a Use Case from a Use Case
 
 A use case should do one thing. As systems grow, what started as one thing often quietly becomes two or three. The tell is length — and the feeling that testing this use case requires setting up far too much.

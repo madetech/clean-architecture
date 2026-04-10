@@ -1,3 +1,7 @@
+---
+title: Extend Use Case behaviour with Domain objects
+---
+
 # Extend Use Case behaviour with Domain objects
 
 When you start building a Clean Architecture system, the advice is to keep your domain objects simple — just data, minimal behaviour. Let the use cases carry the logic. This is deliberate.

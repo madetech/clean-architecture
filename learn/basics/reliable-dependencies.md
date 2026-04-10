@@ -1,3 +1,7 @@
+---
+title: Build in a reliable dependency upgrade path
+---
+
 # Build in a reliable dependency upgrade path
 
 Fake gateways let you build and test your application without a real database. But there is a risk: your Fake can drift from the real thing.

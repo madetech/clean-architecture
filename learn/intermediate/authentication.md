@@ -1,3 +1,7 @@
+---
+title: Authentication
+---
+
 # Authentication
 
 Authentication is the act of verifying identity: confirming that the person or system making a request is who they claim to be.

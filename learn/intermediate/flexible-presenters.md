@@ -140,6 +140,135 @@ class Api::OrdersController < ApplicationController
 end
 ```
 
+## A worked example: polymorphism at every layer
+
+The sections above address the delivery mechanism layer in isolation. This example shows the full chain: the same polymorphism that eliminates branching in the gateway and use case (covered in [extend-with-domain](./extend-with-domain.md)) extends through to the delivery mechanism.
+
+The scenario: viewing an order that can be in one of three states — pending, confirmed, or dispatched. Each state carries different data and should render differently.
+
+### The domain objects
+
+Each state is a separate class. Each knows how to render itself to a presenter by calling the appropriate method — there is no branching, just a direct call:
+
+```ruby
+class PendingOrder
+  def initialize(id:, items:)
+    @id = id
+    @items = items
+  end
+
+  def render_to(presenter)
+    presenter.pending(id: @id, items: @items)
+  end
+end
+
+class ConfirmedOrder
+  def initialize(id:, items:, confirmed_at:)
+    @id = id
+    @items = items
+    @confirmed_at = confirmed_at
+  end
+
+  def render_to(presenter)
+    presenter.confirmed(id: @id, items: @items, confirmed_at: @confirmed_at)
+  end
+end
+
+class DispatchedOrder
+  def initialize(id:, items:, tracking_number:)
+    @id = id
+    @items = items
+    @tracking_number = tracking_number
+  end
+
+  def render_to(presenter)
+    presenter.dispatched(id: @id, items: @items, tracking_number: @tracking_number)
+  end
+end
+```
+
+Notice that each type passes only the data relevant to it. `DispatchedOrder` provides a `tracking_number`; `PendingOrder` does not need one and does not mention it. The presenter method signature for each outcome reflects exactly what that state can offer.
+
+### The gateway and builder
+
+The gateway reads the `status` column and delegates construction to a builder (see [extend-with-domain](./extend-with-domain.md) for the full rationale). Constructor lambdas handle the differing parameters each type requires:
+
+```ruby
+class OrderBuilder
+  CONSTRUCTORS = {
+    'pending'    => ->(row) { PendingOrder.new(id: row[:id], items: row[:items]) },
+    'confirmed'  => ->(row) { ConfirmedOrder.new(id: row[:id], items: row[:items], confirmed_at: row[:confirmed_at]) },
+    'dispatched' => ->(row) { DispatchedOrder.new(id: row[:id], items: row[:items], tracking_number: row[:tracking_number]) }
+  }.freeze
+
+  def self.build(row)
+    constructor = CONSTRUCTORS.fetch(row[:status], CONSTRUCTORS['pending'])
+    constructor.call(row)
+  end
+end
+
+class SequelOrderGateway
+  def find_by_id(id)
+    row = @orders.where(id: id).first
+    return nil unless row
+    items = @line_items.where(order_id: id).all
+    OrderBuilder.build(row.merge(items: items))
+  end
+end
+```
+
+No branching in the gateway. Adding a new state means a new domain class and one new entry in `CONSTRUCTORS`.
+
+### The use case
+
+The use case has no knowledge of order states. It loads the domain object and asks it to render itself:
+
+```ruby
+class ViewOrder
+  def initialize(order_gateway:)
+    @order_gateway = order_gateway
+  end
+
+  def execute(order_id:, presenter:)
+    order = @order_gateway.find_by_id(order_id)
+    return presenter.not_found unless order
+    order.render_to(presenter)
+  end
+end
+```
+
+No branching. The use case is completely insulated from the fact that three order states exist.
+
+### The delivery mechanism
+
+The controller self-shunts as the presenter. Each outcome is a named method — the `show` action itself contains no conditionals:
+
+```ruby
+class OrdersController < ApplicationController
+  def show
+    view_order.execute(order_id: params[:id].to_i, presenter: self)
+  end
+
+  def pending(id:, items:)
+    render :pending, locals: { id: id, items: items }
+  end
+
+  def confirmed(id:, items:, confirmed_at:)
+    render :confirmed, locals: { id: id, items: items, confirmed_at: confirmed_at }
+  end
+
+  def dispatched(id:, items:, tracking_number:)
+    render :dispatched, locals: { id: id, items: items, tracking_number: tracking_number }
+  end
+
+  def not_found
+    render :not_found, status: :not_found
+  end
+end
+```
+
+Adding a fourth state — say `CancelledOrder` — requires: a new domain class, one line in `OrderBuilder::CONSTRUCTORS`, and one new method on the controller. The gateway, the use case, the `show` action, and all other controller methods are untouched.
+
 ## Separate presenter objects
 
 When the presentation logic itself is complex or needs to be shared across controllers, extract it into a dedicated presenter object rather than shunting into the controller:

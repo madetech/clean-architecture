@@ -213,9 +213,54 @@ end
 
 No branching in the gateway. Adding a new state means a new domain class and one new entry in `CONSTRUCTORS`.
 
-### The use case
+### The use case: two approaches
 
-The use case is responsible for mapping domain object types to presenter calls. A lookup hash keyed on the domain class replaces any branching — and keeps presenter awareness out of the domain entirely:
+There are two ways to dispatch from domain object to presenter. Each makes a different trade-off.
+
+#### Option A: delegate to the domain object
+
+Each domain object implements a `present_to` method that calls the appropriate presenter method with its own data:
+
+```ruby
+class PendingOrder
+  # ...
+  def present_to(presenter)
+    presenter.pending(id: @id, items: @items)
+  end
+end
+
+class ConfirmedOrder
+  # ...
+  def present_to(presenter)
+    presenter.confirmed(id: @id, items: @items, confirmed_at: @confirmed_at)
+  end
+end
+
+class DispatchedOrder
+  # ...
+  def present_to(presenter)
+    presenter.dispatched(id: @id, items: @items, tracking_number: @tracking_number)
+  end
+end
+```
+
+The use case simply delegates:
+
+```ruby
+def execute(order_id:, presenter:)
+  order = @order_gateway.find_by_id(order_id)
+  return presenter.not_found unless order
+  order.present_to(presenter)
+end
+```
+
+**Pros:** Truly open/closed — adding a new state requires only a new class that implements `present_to`. The use case never changes. The dispatch is fully polymorphic with no lookup table to maintain.
+
+**Cons:** The domain object becomes aware of a use-case-specific presenter interface. If `PendingOrder` is used across multiple use cases with different presenter interfaces, it must either implement multiple `present_to_*` methods or pick one to favour. Presenter method names leak into the domain's vocabulary.
+
+#### Option B: lookup hash in the use case
+
+The domain objects remain pure data. The use case owns a `PRESENT` dispatch table keyed on the domain class:
 
 ```ruby
 class ViewOrder
@@ -237,7 +282,9 @@ class ViewOrder
 end
 ```
 
-No branching. The `PRESENT` table is the only place that knows about the three states. If a fourth state is added, one new entry is added to `PRESENT` — the `execute` method is untouched.
+**Pros:** Domain objects are free of any presenter knowledge — they are pure domain concepts. Each use case defines its own dispatch table independently, so the same domain objects can be used in contexts with entirely different presenter interfaces.
+
+**Cons:** The use case must be updated when a new domain class is added — it is not fully open/closed. Keying on `order.class` is also fragile: renaming a class silently breaks the lookup, and subclasses will not be found unless explicitly added. The use case implicitly knows about every concrete type in the hierarchy.
 
 ### The delivery mechanism
 

@@ -286,6 +286,81 @@ end
 
 **Cons:** The use case must be updated when a new domain class is added — it is not fully open/closed. Keying on `order.class` is also fragile: renaming a class silently breaks the lookup, and subclasses will not be found unless explicitly added. The use case implicitly knows about every concrete type in the hierarchy.
 
+#### Option C: strategy objects injected at build time
+
+A strategy object per domain type is responsible for calling the right presenter methods. The builder injects the appropriate strategy into each domain object at construction time. The domain object delegates `present_to` to its strategy — knowing it has one, but not what it does:
+
+```ruby
+class PendingOrderPresentationStrategy
+  def present(order, presenter)
+    presenter.pending(id: order.id, items: order.items)
+  end
+end
+
+class ConfirmedOrderPresentationStrategy
+  def present(order, presenter)
+    presenter.confirmed(id: order.id, items: order.items, confirmed_at: order.confirmed_at)
+  end
+end
+
+class DispatchedOrderPresentationStrategy
+  def present(order, presenter)
+    presenter.dispatched(id: order.id, items: order.items, tracking_number: order.tracking_number)
+  end
+end
+```
+
+The domain objects hold a reference to the injected strategy:
+
+```ruby
+class PendingOrder
+  attr_reader :id, :items
+
+  def initialize(id:, items:, presentation_strategy:)
+    @id = id
+    @items = items
+    @presentation_strategy = presentation_strategy
+  end
+
+  def present_to(presenter)
+    @presentation_strategy.present(self, presenter)
+  end
+end
+```
+
+The builder wires the right strategy into each constructor lambda:
+
+```ruby
+class OrderBuilder
+  CONSTRUCTORS = {
+    'pending'    => ->(row) { PendingOrder.new(id: row[:id], items: row[:items], presentation_strategy: PendingOrderPresentationStrategy.new) },
+    'confirmed'  => ->(row) { ConfirmedOrder.new(id: row[:id], items: row[:items], confirmed_at: row[:confirmed_at], presentation_strategy: ConfirmedOrderPresentationStrategy.new) },
+    'dispatched' => ->(row) { DispatchedOrder.new(id: row[:id], items: row[:items], tracking_number: row[:tracking_number], presentation_strategy: DispatchedOrderPresentationStrategy.new) }
+  }.freeze
+
+  def self.build(row)
+    constructor = CONSTRUCTORS.fetch(row[:status], CONSTRUCTORS['pending'])
+    constructor.call(row)
+  end
+end
+```
+
+The use case is identical to Option A — it just calls `present_to`:
+
+```ruby
+def execute(order_id:, presenter:)
+  order = @order_gateway.find_by_id(order_id)
+  return presenter.not_found unless order
+  order.present_to(presenter)
+end
+```
+
+**Pros:** The use case is open/closed — it never changes when new types are added. Domain objects do not know about specific presenter interfaces, only that they hold a strategy. Different use cases can inject different strategies for the same domain type, giving full flexibility without coupling. No fragile `.class` lookup.
+
+**Cons:** More moving parts — a strategy class per type, strategy injection in the builder, and a `present_to` delegation method on every domain object. The indirection can be harder to follow.
+
+**When it is worth the complexity:** Strategy injection earns its place when the aggregate root domain objects are complex hierarchies — for example, an `Order` composed of `LineItem` objects that are themselves polymorphic (`PhysicalItem`, `DigitalItem`, `SubscriptionItem`), each with their own display nuances. A strategy can traverse and present this whole object graph with full knowledge of the hierarchy, while the domain objects and the use case remain oblivious to the presentation logic entirely. For simple flat domain objects, Options A or B are sufficient.
+
 ### The delivery mechanism
 
 The controller self-shunts as the presenter. Each outcome is a named method — the `show` action itself contains no conditionals:

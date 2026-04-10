@@ -148,46 +148,40 @@ The scenario: viewing an order that can be in one of three states — pending, c
 
 ### The domain objects
 
-Each state is a separate class. Each knows how to render itself to a presenter by calling the appropriate method — there is no branching, just a direct call:
+Each state is a separate class, exposing only the data relevant to that state. Domain objects have no knowledge of presenters — they are pure domain concepts:
 
 ```ruby
 class PendingOrder
+  attr_reader :id, :items
+
   def initialize(id:, items:)
     @id = id
     @items = items
   end
-
-  def render_to(presenter)
-    presenter.pending(id: @id, items: @items)
-  end
 end
 
 class ConfirmedOrder
+  attr_reader :id, :items, :confirmed_at
+
   def initialize(id:, items:, confirmed_at:)
     @id = id
     @items = items
     @confirmed_at = confirmed_at
   end
-
-  def render_to(presenter)
-    presenter.confirmed(id: @id, items: @items, confirmed_at: @confirmed_at)
-  end
 end
 
 class DispatchedOrder
+  attr_reader :id, :items, :tracking_number
+
   def initialize(id:, items:, tracking_number:)
     @id = id
     @items = items
     @tracking_number = tracking_number
   end
-
-  def render_to(presenter)
-    presenter.dispatched(id: @id, items: @items, tracking_number: @tracking_number)
-  end
 end
 ```
 
-Notice that each type passes only the data relevant to it. `DispatchedOrder` provides a `tracking_number`; `PendingOrder` does not need one and does not mention it. The presenter method signature for each outcome reflects exactly what that state can offer.
+`DispatchedOrder` exposes a `tracking_number`; `PendingOrder` does not. Each type surfaces only the data it actually has.
 
 ### The gateway and builder
 
@@ -221,10 +215,16 @@ No branching in the gateway. Adding a new state means a new domain class and one
 
 ### The use case
 
-The use case has no knowledge of order states. It loads the domain object and asks it to render itself:
+The use case is responsible for mapping domain object types to presenter calls. A lookup hash keyed on the domain class replaces any branching — and keeps presenter awareness out of the domain entirely:
 
 ```ruby
 class ViewOrder
+  PRESENT = {
+    PendingOrder    => ->(order, p) { p.pending(id: order.id, items: order.items) },
+    ConfirmedOrder  => ->(order, p) { p.confirmed(id: order.id, items: order.items, confirmed_at: order.confirmed_at) },
+    DispatchedOrder => ->(order, p) { p.dispatched(id: order.id, items: order.items, tracking_number: order.tracking_number) }
+  }.freeze
+
   def initialize(order_gateway:)
     @order_gateway = order_gateway
   end
@@ -232,12 +232,12 @@ class ViewOrder
   def execute(order_id:, presenter:)
     order = @order_gateway.find_by_id(order_id)
     return presenter.not_found unless order
-    order.render_to(presenter)
+    PRESENT.fetch(order.class).call(order, presenter)
   end
 end
 ```
 
-No branching. The use case is completely insulated from the fact that three order states exist.
+No branching. The `PRESENT` table is the only place that knows about the three states. If a fourth state is added, one new entry is added to `PRESENT` — the `execute` method is untouched.
 
 ### The delivery mechanism
 

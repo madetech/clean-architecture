@@ -16,8 +16,9 @@ It is tempting to check permissions inside the use case itself:
 class CancelOrder
   def execute(order_id:, actor_id:)
     order = @order_gateway.find_by_id(order_id)
-    return { success: false, errors: [:not_authorised] } unless order[:customer_id] == actor_id
-    @order_gateway.cancel(order_id)
+    return { success: false, errors: [:not_authorised] } unless order.customer_id == actor_id
+    order.cancel
+    @order_gateway.save(order)
     { success: true }
   end
 end
@@ -37,11 +38,15 @@ class CancelOrder
   end
 
   def execute(order_id:)
-    @order_gateway.cancel(order_id)
+    order = @order_gateway.find_by_id(order_id)
+    order.cancel
+    @order_gateway.save(order)
     { success: true }
   end
 end
 ```
+
+The gateway returns an `Order` [Domain](../../domain.md) object and accepts one back to save — there is no `cancel(order_id)` method on the gateway. Cancelling is something an order knows how to do; persisting the result is all the gateway is for.
 
 ```ruby
 # The proxy — responsible only for authorisation
@@ -70,6 +75,8 @@ The proxy has the same interface as the use case it wraps: it responds to `execu
 
 Policy objects hold the authorisation rules. They are only ever evaluated by proxy classes — not by use cases, not by delivery mechanisms.
 
+Because the gateway returns an `Order` Domain object, the policy is written against the domain rather than against database columns.
+
 The policy receives the data it needs to make a decision and the `CurrentUser` that provides actor context (introduced in [Authentication](./authentication.md)):
 
 ```ruby
@@ -92,11 +99,11 @@ class OrderPolicy
   private
 
   def owns_order?
-    @order[:customer_id] == @current_user.id
+    @order.customer_id == @current_user.id
   end
 
   def order_is_pending?
-    @order[:status] == 'pending'
+    @order.pending?
   end
 end
 ```
@@ -145,7 +152,7 @@ describe OrderPolicy do
   describe '#can_cancel?' do
     context 'when the actor owns the order and it is pending' do
       it 'permits cancellation' do
-        order = { customer_id: 1, status: 'pending' }
+        order = Order.new(customer_id: 1, status: 'pending', items: [])
         current_user = CurrentUser.new(1)
         expect(described_class.new(order: order, current_user: current_user).can_cancel?).to be(true)
       end
@@ -153,7 +160,7 @@ describe OrderPolicy do
 
     context 'when the actor does not own the order' do
       it 'denies cancellation' do
-        order = { customer_id: 1, status: 'pending' }
+        order = Order.new(customer_id: 1, status: 'pending', items: [])
         current_user = CurrentUser.new(2)
         expect(described_class.new(order: order, current_user: current_user).can_cancel?).to be(false)
       end
@@ -161,7 +168,7 @@ describe OrderPolicy do
 
     context 'when the order is not pending' do
       it 'denies cancellation' do
-        order = { customer_id: 1, status: 'dispatched' }
+        order = Order.new(customer_id: 1, status: 'dispatched', items: [])
         current_user = CurrentUser.new(1)
         expect(described_class.new(order: order, current_user: current_user).can_cancel?).to be(false)
       end
@@ -178,7 +185,7 @@ describe CancelOrder do
   subject { described_class.new(order_gateway: order_gateway) }
 
   it 'cancels the order' do
-    order_id = order_gateway.save(customer_id: 1, status: 'pending', items: [])
+    order_id = order_gateway.save(Order.new(customer_id: 1, status: 'pending', items: []))
     result = subject.execute(order_id: order_id)
     expect(result[:success]).to be(true)
   end
@@ -203,7 +210,7 @@ describe AuthorisedCancelOrder do
 
   context 'when the actor owns a pending order' do
     it 'delegates to the inner use case' do
-      order_id = order_gateway.save(customer_id: 1, status: 'pending', items: [])
+      order_id = order_gateway.save(Order.new(customer_id: 1, status: 'pending', items: []))
       subject.execute(order_id: order_id)
       expect(inner_use_case).to have_received(:execute).with(order_id: order_id)
     end
@@ -211,7 +218,7 @@ describe AuthorisedCancelOrder do
 
   context 'when the actor does not own the order' do
     it 'returns not_authorised without delegating' do
-      order_id = order_gateway.save(customer_id: 2, status: 'pending', items: [])
+      order_id = order_gateway.save(Order.new(customer_id: 2, status: 'pending', items: []))
       result = subject.execute(order_id: order_id)
       expect(result[:errors]).to include(:not_authorised)
       expect(inner_use_case).not_to have_received(:execute)
@@ -228,7 +235,7 @@ It is tempting to enforce authorisation in a `before` filter:
 # Avoid this
 before '/orders/:id/cancel' do
   order = order_gateway.find_by_id(params[:id].to_i)
-  halt 403 unless order[:customer_id] == @current_user_id
+  halt 403 unless order.customer_id == @current_user_id
 end
 ```
 

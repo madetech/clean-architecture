@@ -20,7 +20,7 @@ class PlaceOrder
     subtotal = items.sum { |item| item[:price] * item[:quantity] }
     total = items.sum { |i| i[:quantity] } >= 10 ? subtotal * 0.9 : subtotal
 
-    id = @order_gateway.save(customer_id: customer_id, items: items, total: total)
+    id = @order_gateway.save(Order.new(customer_id: customer_id, items: items, total: total))
     { order_id: id }
   end
 end
@@ -38,7 +38,7 @@ class UpdateOrder
     subtotal = items.sum { |item| item[:price] * item[:quantity] }
     total = items.sum { |i| i[:quantity] } >= 10 ? subtotal * 0.9 : subtotal
 
-    @order_gateway.update(order_id: order_id, items: items, total: total)
+    @order_gateway.save(Order.new(id: order_id, items: items, total: total))
     { order_id: order_id }
   end
 end
@@ -81,7 +81,7 @@ Both use cases simplify to:
 class PlaceOrder
   def execute(customer_id:, items:)
     total = OrderPricing.new(items).total
-    id = @order_gateway.save(customer_id: customer_id, items: items, total: total)
+    id = @order_gateway.save(Order.new(customer_id: customer_id, items: items, total: total))
     { order_id: id }
   end
 end
@@ -89,7 +89,7 @@ end
 class UpdateOrder
   def execute(order_id:, items:)
     total = OrderPricing.new(items).total
-    @order_gateway.update(order_id: order_id, items: items, total: total)
+    @order_gateway.save(Order.new(id: order_id, items: items, total: total))
     { order_id: order_id }
   end
 end
@@ -133,13 +133,13 @@ class PlaceOrder
     customer = @customer_gateway.find(customer_id)
     pricing = OrderPricing.new(items)
 
-    total = case customer[:tier]
+    total = case customer.tier
             when 'wholesale'  then pricing.subtotal * 0.6
             when 'premium'    then pricing.subtotal * 0.8
             else                   pricing.subtotal
             end
 
-    id = @order_gateway.save(customer_id: customer_id, items: items, total: total)
+    id = @order_gateway.save(Order.new(customer_id: customer_id, items: items, total: total))
     { order_id: id }
   end
 end
@@ -205,7 +205,7 @@ class PlaceOrder
     customer = @customer_gateway.find(customer_id)
     total = OrderPricing.new(items).subtotal * customer.discount_rate
 
-    id = @order_gateway.save(customer_id: customer_id, items: items, total: total)
+    id = @order_gateway.save(Order.new(customer_id: customer_id, items: items, total: total))
     { order_id: id }
   end
 end
@@ -227,7 +227,7 @@ end
 
 ### Extracting a Builder
 
-The fake gateway needs access to the same construction logic as the real gateway. The approach above of referencing `SequelCustomerGateway::TIER_CONSTRUCTORS` directly creates a dependency from the fake onto the real — the fake now knows about a specific persistence implementation it should be unaware of.
+Sooner or later a second gateway needs to build the same customers — an HTTP gateway onto another service, a CSV importer, a read-replica gateway. Referencing `SequelCustomerGateway::TIER_CONSTRUCTORS` from that second gateway creates a dependency from one persistence implementation onto another, which neither should have.
 
 Extract the construction logic into a dedicated builder:
 
@@ -246,28 +246,39 @@ class CustomerBuilder
 end
 ```
 
-Both the real and fake gateway delegate to the builder — neither owns the construction logic, and neither depends on the other:
+Every gateway that reads stored data delegates to the builder — none owns the construction logic, and none depends on another:
 
 ```ruby
 class SequelCustomerGateway
   def find(id)
-    row = @customers.where(id: id).first
-    CustomerBuilder.build(row)
+    CustomerBuilder.build(@customers.where(id: id).first)
   end
 end
 
+class HttpCustomerGateway
+  def find(id)
+    CustomerBuilder.build(get("/customers/#{id}"))
+  end
+end
+```
+
+The Fake needs no builder at all. It is handed `Customer` domain objects to save and hands the same objects back:
+
+```ruby
 class InMemoryCustomerGateway
   def find(id)
     @customers[id]
   end
 
-  def save(id:, **attrs)
-    @customers[id] = CustomerBuilder.build(attrs)
+  def save(customer)
+    @customers[customer.id] = customer
   end
 end
 ```
 
-Adding a new tier now means: a new domain class, one new entry in `CustomerBuilder::CONSTRUCTORS`. Nothing else changes — not the real gateway, not the fake, not any use case.
+That is worth dwelling on. Because every gateway — real or Fake — accepts and returns domain objects, the Fake has nothing to translate. The builder is only needed where stored data has to be turned back into a domain object, and that is a concern of gateways that read stored data, not of the domain or of any use case.
+
+Adding a new tier now means: a new domain class, one new entry in `CustomerBuilder::CONSTRUCTORS`. Nothing else changes — not any gateway, not the Fake, not any use case.
 
 The builder can also be tested independently to verify it produces the right type for each tier value.
 

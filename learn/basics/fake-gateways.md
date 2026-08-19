@@ -11,12 +11,12 @@ Once you understand the domain, you can then make an informed decision about tec
 Using an array as a backing store, a lot of early gateways might follow this pattern. 
 
 ```ruby
-class InMemoryOrder
+class InMemoryOrderGateway
   def initialize
     @orders = []
   end
   
-  def find_by(id)
+  def find_by_id(id)
     @orders[id]
   end
 
@@ -31,11 +31,13 @@ class InMemoryOrder
 end
 ```
 
+Note that the Fake honours the same interface as a real gateway will: it accepts an `Order` [Domain](../../domain.md) object to save, and hands `Order` objects back when read. Because it stores the Domain objects it was given, there is no mapping code at all — which is exactly why a Fake is cheap to write. What it must not do is expose a *different* interface to the use case, such as taking `customer_id:` and `items:` instead of an `Order`. If it does, swapping in a [real gateway](./gateway-101.md) later means changing every use case too.
+
 ## As part of an acceptance test
 
 ```ruby
 describe 'orders' do
-  let(:order_gateway) { InMemoryOrder.new }
+  let(:order_gateway) { InMemoryOrderGateway.new }
   let(:view_order) { Customer::UseCase::ViewOrder.new(order_gateway: order_gateway) }
   let(:place_order) { Customer::UseCase::PlaceOrder.new(order_gateway: order_gateway) }
   

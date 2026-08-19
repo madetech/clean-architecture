@@ -20,7 +20,7 @@ class PlaceOrder
     return { status: :no_items } if items.empty?
     return { status: :out_of_stock } unless @inventory_gateway.all_available?(items)
 
-    order_id = @order_gateway.save(customer_id: customer_id, items: items)
+    order_id = @order_gateway.save(Order.new(customer_id: customer_id, items: items))
     { status: :success, order_id: order_id }
   end
 end
@@ -72,7 +72,7 @@ class PlaceOrder
     return presenter.no_items if items.empty?
     return presenter.out_of_stock unless @inventory_gateway.all_available?(items)
 
-    order_id = @order_gateway.save(customer_id: customer_id, items: items)
+    order_id = @order_gateway.save(Order.new(customer_id: customer_id, items: items))
     presenter.success(order_id: order_id)
   end
 end
@@ -454,7 +454,7 @@ describe PlaceOrder do
   end
 
   context 'when items are available' do
-    before { customer_gateway.save(id: 1) }
+    before { customer_gateway.save(Customer.new(id: 1)) }
     before { inventory_gateway.mark_available('SKU-1') }
 
     it 'calls success with the order id' do
@@ -464,7 +464,7 @@ describe PlaceOrder do
   end
 
   context 'when items are out of stock' do
-    before { customer_gateway.save(id: 1) }
+    before { customer_gateway.save(Customer.new(id: 1)) }
     before { inventory_gateway.mark_unavailable('SKU-1') }
 
     it 'calls out_of_stock' do

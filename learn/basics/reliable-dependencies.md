@@ -25,19 +25,21 @@ In RSpec, this is done with `shared_examples`:
 ```ruby
 RSpec.shared_examples 'an order gateway' do
   it 'saves and retrieves an order by id' do
-    id = subject.save(customer_id: 1, items: [])
+    id = subject.save(Order.new(customer_id: 1, items: []))
     order = subject.find_by_id(id)
-    expect(order[:customer_id]).to eq(1)
+    expect(order.customer_id).to eq(1)
   end
 
   it 'returns orders in reverse chronological order' do
-    subject.save(customer_id: 1, items: [])
-    subject.save(customer_id: 2, items: [])
+    subject.save(Order.new(customer_id: 1, items: []))
+    subject.save(Order.new(customer_id: 2, items: []))
     orders = subject.all
-    expect(orders.first[:customer_id]).to eq(2)
+    expect(orders.first.customer_id).to eq(2)
   end
 end
 ```
+
+The contract is written entirely in [Domain](../../domain.md) objects — it hands the gateway an `Order` and expects an `Order` back. That is deliberate: it is the same interface every gateway must honour, so the contract is the place it gets pinned down. A contract written against hashes would let a Fake and a real gateway agree on keys while disagreeing about the domain.
 
 Both gateways include the contract:
 
@@ -57,7 +59,7 @@ Now the Fake is contractually obligated to behave the same way as the real gatew
 
 ## What the contract should cover
 
-- The interface: what methods exist, what they accept, what they return
+- The interface: what methods exist, what Domain objects they accept, what Domain objects they return
 - The semantics: ordering, uniqueness constraints, what happens when a record is not found
 
 The contract does not need to test every edge case — that is the job of the real gateway's own integration tests. It only needs to cover the behaviour your use cases depend on.

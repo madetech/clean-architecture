@@ -10,9 +10,11 @@ Once you understand the domain well enough — and your acceptance tests are pas
 
 A gateway is responsible for one thing: translating between the language of your domain and the language of your storage technology.
 
-It converts a domain-friendly request into whatever the database expects, and converts what the database returns into a plain hash that the use case can work with.
+It accepts a [Domain](../../domain.md) object and converts it into whatever the database expects, and converts what the database returns back into Domain objects that the use case can work with.
 
 That is the full extent of its responsibility. Business logic does not belong here.
+
+The only things that cross a gateway boundary that are *not* Domain objects are the values used to identify what you are asking for — an id, an email address, a date range. Everything else, in both directions, is a Domain object.
 
 ## Implementing the adapter
 
@@ -27,32 +29,38 @@ class SequelOrderGateway
     @line_items = db[:line_items]
   end
 
-  def save(customer_id:, items:)
-    id = @orders.insert(customer_id: customer_id)
-    items.each do |item|
-      @line_items.insert(order_id: id, sku: item[:sku], quantity: item[:quantity])
+  def save(order)
+    id = @orders.insert(customer_id: order.customer_id)
+    order.items.each do |item|
+      @line_items.insert(order_id: id, sku: item.sku, quantity: item.quantity)
     end
     id
   end
 
   def find_by_id(id)
-    order = @orders.where(id: id).first
-    return nil unless order
+    row = @orders.where(id: id).first
+    return nil unless row
 
-    items = @line_items.where(order_id: id).map do |row|
-      { sku: row[:sku], quantity: row[:quantity] }
+    items = @line_items.where(order_id: id).map do |item_row|
+      LineItem.new(sku: item_row[:sku], quantity: item_row[:quantity])
     end
 
-    {
-      id: order[:id],
-      customer_id: order[:customer_id],
-      items: items
-    }
+    Order.new(id: row[:id], customer_id: row[:customer_id], items: items)
   end
 end
 ```
 
 The use case knows nothing about Sequel, table names, or how items are stored. That is the point.
+
+Note what `save` accepts: an `Order`, not `customer_id:` and `items:`. If the gateway took a bag of attributes, every use case that saves an order would have to know how an order is assembled, and the shape of an order would be spread across the system rather than living in one class. The same applies in reverse — `find_by_id` hands back an `Order`, not a hash, so the use case can ask the order questions rather than rummaging through keys.
+
+Updating works the same way. There is no separate `update` method taking an id and a hash of changes — the use case reads an order, changes it, and saves it back:
+
+```ruby
+order = order_gateway.find_by_id(order_id)
+order.cancel
+order_gateway.save(order)
+```
 
 ## Keep the gateway thin
 
@@ -60,8 +68,8 @@ The gateway's job is persistence, not policy. Validation and rules belong in you
 
 ```ruby
 # Don't do this
-def save(customer_id:, items:)
-  raise 'No items' if items.empty?   # business logic — belongs in the use case
+def save(order)
+  raise 'No items' if order.items.empty?   # business logic — belongs in the use case or domain object
   @orders.insert(...)
 end
 ```

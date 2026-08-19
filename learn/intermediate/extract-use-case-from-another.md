@@ -18,13 +18,15 @@ class PlaceOrder
   end
 
   def execute(customer_id:, items:)
-    order_id = @order_gateway.save(customer_id: customer_id, items: items)
+    order_id = @order_gateway.save(Order.new(customer_id: customer_id, items: items))
 
     customer = @customer_gateway.find(customer_id)
-    @mailer.send_confirmation(to: customer[:email], order_id: order_id)
+    @mailer.send_confirmation(to: customer.email, order_id: order_id)
 
     items.each do |item|
-      @inventory_gateway.decrement(sku: item[:sku], quantity: item[:quantity])
+      stock = @inventory_gateway.find_by_sku(item[:sku])
+      stock.reserve(item[:quantity])
+      @inventory_gateway.save(stock)
     end
 
     { order_id: order_id }
@@ -47,7 +49,7 @@ class NotifyOrderPlaced
 
   def execute(customer_id:, order_id:)
     customer = @customer_gateway.find(customer_id)
-    @mailer.send_confirmation(to: customer[:email], order_id: order_id)
+    @mailer.send_confirmation(to: customer.email, order_id: order_id)
     {}
   end
 end
@@ -61,7 +63,9 @@ class ReserveInventory
 
   def execute(items:)
     items.each do |item|
-      @inventory_gateway.decrement(sku: item[:sku], quantity: item[:quantity])
+      stock = @inventory_gateway.find_by_sku(item[:sku])
+      stock.reserve(item[:quantity])
+      @inventory_gateway.save(stock)
     end
     {}
   end
@@ -79,7 +83,7 @@ class PlaceOrder
   end
 
   def execute(customer_id:, items:)
-    order_id = @order_gateway.save(customer_id: customer_id, items: items)
+    order_id = @order_gateway.save(Order.new(customer_id: customer_id, items: items))
     @notify_order_placed.execute(customer_id: customer_id, order_id: order_id)
     @reserve_inventory.execute(items: items)
     { order_id: order_id }
@@ -180,7 +184,7 @@ class PlaceOrder
   end
 
   def execute(customer_id:, items:)
-    order_id = @order_gateway.save(customer_id: customer_id, items: items)
+    order_id = @order_gateway.save(Order.new(customer_id: customer_id, items: items))
     @event_publisher.publish(:order_placed, customer_id: customer_id, order_id: order_id, items: items)
     { order_id: order_id }
   end

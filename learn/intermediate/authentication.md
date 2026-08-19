@@ -22,17 +22,19 @@ class AuthenticateUser
     return { success: false, errors: [:invalid_credentials] } unless user
     return { success: false, errors: [:invalid_credentials] } unless valid_password?(user, password)
 
-    token = @session_gateway.create(user_id: user[:id])
-    { success: true, token: token }
+    session = @session_gateway.create(user_id: user.id)
+    { success: true, token: session.token }
   end
 
   private
 
   def valid_password?(user, password)
-    BCrypt::Password.new(user[:password_digest]) == password
+    BCrypt::Password.new(user.password_digest) == password
   end
 end
 ```
+
+`find_by_email` returns a `User` [Domain](../../domain.md) object, not a row — the email address is simply the value used to look it up. The use case asks the user for its `id` and `password_digest`; it never sees a database column.
 
 Note that the use case returns the same error (`:invalid_credentials`) whether the email is unrecognised or the password is wrong. This is deliberate — distinguishing the two would allow an attacker to enumerate valid email addresses.
 
@@ -41,6 +43,16 @@ Note that the use case returns the same error (`:invalid_credentials`) whether t
 A session token is persisted state — it belongs in a gateway:
 
 ```ruby
+class Session
+  attr_reader :token, :user_id, :expires_at
+
+  def initialize(token:, user_id:, expires_at:)
+    @token = token
+    @user_id = user_id
+    @expires_at = expires_at
+  end
+end
+
 class SequelSessionGateway
   TOKEN_EXPIRY_SECONDS = 86_400
 
@@ -49,17 +61,20 @@ class SequelSessionGateway
   end
 
   def create(user_id:)
-    token = SecureRandom.hex(32)
-    @sessions.insert(
-      token: token,
+    session = Session.new(
+      token: SecureRandom.hex(32),
       user_id: user_id,
       expires_at: Time.now + TOKEN_EXPIRY_SECONDS
     )
-    token
+    @sessions.insert(token: session.token, user_id: session.user_id, expires_at: session.expires_at)
+    session
   end
 
   def find_by_token(token)
-    @sessions.where(token: token).where { expires_at > Time.now }.first
+    row = @sessions.where(token: token).where { expires_at > Time.now }.first
+    return nil unless row
+
+    Session.new(token: row[:token], user_id: row[:user_id], expires_at: row[:expires_at])
   end
 
   def delete(token:)
@@ -67,6 +82,8 @@ class SequelSessionGateway
   end
 end
 ```
+
+Both methods deal in `Session` Domain objects. `create` is the one gateway method here that takes an id rather than a Domain object to save, because the token and the expiry are minted by the store rather than by the caller — it is a factory, and it still hands back a `Session`. Anything a use case wants to know about the session it asks the `Session` for.
 
 A `LogOutUser` use case would call `session_gateway.delete(token:)`. Expiry is enforced by the gateway — use cases do not need to reason about it.
 
@@ -83,7 +100,7 @@ before do
   session = session_gateway.find_by_token(token.to_s)
   halt 401, json(errors: [:unauthenticated]) unless session
 
-  @current_user_id = session[:user_id]
+  @current_user_id = session.user_id
 end
 ```
 
@@ -129,7 +146,7 @@ class PlaceOrder
   end
 
   def execute(items:)
-    id = @order_gateway.save(customer_id: @current_user.id, items: items)
+    id = @order_gateway.save(Order.new(customer_id: @current_user.id, items: items))
     { order_id: id }
   end
 end
@@ -140,7 +157,7 @@ The delivery mechanism constructs the `CurrentUser` after authentication and pas
 ```ruby
 before do
   # ... token verification ...
-  @current_user = CurrentUser.new(session[:user_id])
+  @current_user = CurrentUser.new(session.user_id)
 end
 
 post '/orders' do
@@ -191,7 +208,12 @@ describe AuthenticateUser do
   let(:use_case) { described_class.new(user_gateway: user_gateway, session_gateway: session_gateway) }
 
   before do
-    user_gateway.create(email: 'user@example.com', password: 'correct-password')
+    user_gateway.save(
+      User.new(
+        email: 'user@example.com',
+        password_digest: BCrypt::Password.create('correct-password')
+      )
+    )
   end
 
   context 'with valid credentials' do

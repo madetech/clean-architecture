@@ -11,7 +11,9 @@ class TurnLightOn
   end
   
   def execute(light_id:)
-    @light_gateway.turn_on(light_id)
+    light = @light_gateway.find(light_id)
+    light.turn_on
+    @light_gateway.save(light)
     {}
   end
 end
@@ -33,6 +35,7 @@ class TurnLightOn
     return light_not_found if light.nil?
     
     light.turn_on
+    @light_gateway.save(light)
     
     {
       success: true,
@@ -75,6 +78,7 @@ class TurnLightOn
   
   def turn_light_on(light)
     light.turn_on
+    @light_gateway.save(light)
     @presenter.success
   end
   
@@ -92,6 +96,7 @@ It's not hard to imagine this being called by a button with a red error light, n
 
 * Each use case should be Framework and Database agnostic. 
 * Use Cases define an interface (implicit in Ruby) that must be fulfilled by a Gateway
+  * That interface is expressed in [Domain](domain.md) objects — a Gateway returns Domain objects and accepts Domain objects to save. See [Gateway](gateway.md).
 * Use Cases expose a request, response interface which are defined as simple data structures (Hashes or Structs)
   * In the Presenter pattern the Responses should always be simple data structures.
 

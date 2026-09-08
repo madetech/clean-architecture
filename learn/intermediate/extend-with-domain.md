@@ -284,6 +284,8 @@ You can also test the builder on its own, to check that the builder produces the
 
 ## The guiding question
 
-Before you move logic into the domain, ask one question: _must this rule hold for every Use Case in the system?_
+Before you move logic into the domain, ask one question: _must this rule hold for every Use Case in this [bounded context](../../bounded_contexts.md)?_
 
-A rule that applies to one Use Case belongs in that Use Case. A rule that constrains the domain itself, and that would be wrong whichever Use Case triggered it, belongs in the domain. A rule that varies with the stored data belongs in a set of Domain object types, and the Gateway chooses which type to construct.
+A rule that applies to one Use Case belongs in that Use Case. A rule that constrains the domain itself, and that would be wrong whichever Use Case in the bounded context triggered it, belongs in the domain. A rule that varies with the stored data belongs in a set of Domain object types, and the Gateway chooses which type to construct.
+
+A rule that holds in one bounded context and not in another is not a rule of the shared domain. Each bounded context keeps its own Domain object for that concept.

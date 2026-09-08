@@ -4,6 +4,8 @@ A Gateway adapts an IO mechanism for your [Use Cases](use_case.md).
 
 A Gateway is usually the adapter between a data source, such as PostgreSQL, and one [Domain](domain.md) object, such as `Order`.
 
+That one Domain object is often an aggregate root. An aggregate root holds an object graph of other Domain objects. An `Invoice` holds `InvoiceItem` objects and `TaxDisposition` objects. The Gateway reads and writes the whole graph, and the Use Case receives the root only.
+
 In an object-oriented language a Gateway is a class that implements an interface.
 
 IO is anything outside your application, such as a file, a database, or an HTTP API call.
@@ -22,7 +24,16 @@ A Gateway exposes an interface to Use Cases in [Domain](domain.md) objects:
 * A read method returns a Domain object, or a collection of Domain objects. A read method never returns a row, a hash, or an ORM record.
 * A write method accepts a Domain object.
 
-An identifier is the exception. A Use Case passes an identifier to say which record to read or delete, such as `find_by_id(id)`, `find_by_email(email)`, a page number, or a date range. An identifier locates data. An identifier is not a Domain object, and a Use Case passes an identifier without breaking the rule.
+An identifier is the exception. A Use Case passes an identifier to say which record to read or delete, such as `find_by_id(id)`, `find_by_email(email)`, a page number, or a date range. An identifier locates data, so a Use Case passes an identifier without breaking the rule.
+
+An identifier is sometimes a Domain object itself. A searchable Gateway accepts a `Query` Domain object that describes the search in the language of the domain:
+
+```ruby
+query = Query.new(customer_id: 3).placed_after(Date.new(2026, 1, 1)).ordered_by(:total)
+orders = order_gateway.search(query)
+```
+
+Each Gateway implementation translates the same `Query` into its own form: SQL for a Sequel Gateway, a query string for an HTTP Gateway, and a filter block for an in-memory Fake. The Use Case builds one `Query` and passes that `Query` to any implementation.
 
 Do not write a Gateway method that accepts a bag of attributes:
 

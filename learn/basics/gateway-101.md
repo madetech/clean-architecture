@@ -14,7 +14,7 @@ A Gateway accepts a [Domain](../../domain.md) object and converts it into the fo
 
 A Gateway does nothing else. Business logic does not belong in a Gateway.
 
-An identifier is the only thing that crosses the Gateway boundary and is *not* a Domain object. An identifier is an id, an email address, or a date range. Everything else, in both directions, is a Domain object.
+An identifier is the one thing that crosses the Gateway boundary and does *not* have to be a Domain object. An identifier is an id, an email address, or a date range. An identifier is sometimes a Domain object itself, such as the `Query` object that a searchable Gateway accepts. See [Gateway](../../gateway.md). Everything else, in both directions, is a Domain object.
 
 ## Implementing the adapter
 

@@ -20,7 +20,23 @@ An implicit bounded context encodes the separation in naming and namespacing onl
 
 Check the fan-out of each Use Case. Fan-out that crosses a bounded context needs care.
 
-For example, a Use Case in "Financial Reporting" depends on a Gateway in "Authentication". Instead, give "Financial Reporting" its own user Gateway. That Gateway depends on a Use Case in "Authentication", and on database tables that belong to "Financial Reporting".
+For example, a Use Case in "Financial Reporting" needs the name of a user. The user data belongs to "Authentication".
+
+WARNING: A Use Case must never call a [Gateway](gateway.md) that belongs to another bounded context. A Gateway is a private detail of the bounded context that owns it. A Financial Reporting Use Case that calls an Authentication Gateway reads the Authentication tables, and Authentication can then no longer change those tables without breaking Financial Reporting.
+
+A Use Case may call a Use Case in another bounded context. The Use Case boundary is the part that a bounded context publishes, so a call across that boundary is correct. The Financial Reporting Use Case calls a Use Case in Authentication, and receives a simple data structure back.
+
+### When to wrap the call in a Gateway
+
+Financial Reporting can also give itself a user Gateway that calls the Authentication Use Case. That wrapper is an option, not a requirement.
+
+Wrap the call when data from the other bounded context must combine with data that this bounded context owns.
+
+The Financial Reporting user Gateway then has two IO sources: the Use Case boundary of Authentication, and the database tables that Financial Reporting owns, such as a ledger table. A Gateway adapts an IO mechanism, and the published boundary of another bounded context is an IO mechanism in the same way that PostgreSQL or an HTTP API is one. The Gateway combines both sources into one Financial Reporting Domain object.
+
+The Financial Reporting Use Case then receives one collaborator and one Domain object. The Use Case does not join two sources itself, and the Use Case does not know which field came from which source.
+
+Call the other Use Case directly when there is nothing to combine. A Gateway that only forwards a single call adds a class and no value.
 
 ## Ownership
 

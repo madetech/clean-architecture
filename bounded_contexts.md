@@ -1,27 +1,29 @@
 # Bounded Contexts
 
-Once the SOLID and Package principles are understood, it is important to understand the role that bounded contexts play.
+Learn the SOLID principles and the Package principles first. Bounded contexts build on both.
 
-## Explicit 
+## Explicit
 
-When creating explicit bounded contexts, package principles and the cost of creating a separate package apply.
+An explicit bounded context uses a language feature or a tool to encode the separation. Examples are separate repositories, separate microservices, Maven multi-modules, gems, and .NET assemblies.
 
-Explicit bounded contexts use a language or tooling-level feature to encode separation these could include using different repositories, separate microservice, maven multi-modules, gems or even .NET assemblies.
-The benefit of explicit bounded contexts is that they promote clear separation (some methods enforce explicit decoupling more than others).
+An explicit bounded context creates a clear separation. Some of these methods enforce the separation more strongly than others.
+
+The Package principles apply to an explicit bounded context. The cost of creating a separate package applies too.
 
 ## Implicit
 
-In Clean Architecture, it is important to also draw implicit bounded contexts to separate areas of the system that change for different reasons. 
+An implicit bounded context separates areas of the system that change for different reasons. Draw implicit bounded contexts as well as explicit ones.
 
-Implicit bounded contexts will not encode separation in anything other than naming / namespacing in terms of grouping functionality. 
-The benefit here is that the separation is cheap to create and destroy.
+An implicit bounded context encodes the separation in naming and namespacing only. An implicit bounded context is cheap to create and cheap to remove.
 
-Carefully thinking about the fan-out of UseCases is important. An important consideration is when fan-out crosses a bounded context
-e.g. A UseCase related "Financial Reporting" dependending on a gateway in "Authentication". 
+## Fan-out across a bounded context
 
-It may make sense to have a Financial Reporting user Gateway that depends on a UseCase in Authentication and, database tables specific to the Financial Reporting.
+Check the fan-out of each Use Case. Fan-out that crosses a bounded context needs care.
 
-Database Structures *are* Global variables. So it's important to think about which bounded context "owns" or should encapsulate those databases/tables/columns.
+For example, a Use Case in "Financial Reporting" depends on a Gateway in "Authentication". Instead, give "Financial Reporting" its own user Gateway. That Gateway depends on a Use Case in "Authentication", and on database tables that belong to "Financial Reporting".
 
-Similarly it might be important to consider a certain subset of Domain object(s) implicitly bounded context private. 
-Such that, those Domain objects may only be manipulated (by another bounded context) through the UseCase boundary of that bounded context.
+## Ownership
+
+A database structure is a global variable. Decide which bounded context owns each database, each table, and each column.
+
+You can also make a set of Domain objects private to one bounded context. Another bounded context then changes those Domain objects only through the Use Case boundary of the owning context.

@@ -1,8 +1,8 @@
 # Use Case
 
-The purpose of a use case is to serve a user's use case of the system. For example, "turn light on" or "send email to tenant".
+A Use Case serves one task that a user asks the system to do. Examples are "turn light on" and "send email to tenant".
 
-In code, the entry point of a Use Case is a class that has one public method.
+In code, a Use Case is a class with one public method.
 
 ```ruby
 class TurnLightOn
@@ -19,9 +19,9 @@ class TurnLightOn
 end
 ```
 
-This is a simple example, but it only considers the happy path.
+That example covers the success path only.
 
-Validation should also be handled by the Use Case too:
+A Use Case also validates its input:
 
 ```ruby
 class TurnLightOn
@@ -54,9 +54,9 @@ class TurnLightOn
 end
 ```
 
-As you can imagine, depending on the system there may be more complexity needed to service the TurnLightOn use case.
+A real system usually needs more code than this to serve the `TurnLightOn` Use Case.
 
-Use Cases can also use the presenter pattern:
+A Use Case can also use the presenter pattern:
 
 ```ruby
 class TurnLightOn
@@ -88,24 +88,24 @@ class TurnLightOn
 end
 ```
 
-In this example, the Use Case is not aware of the implementation details of the lighting system, nor how the user is accessing the use case or seeing the errors presented to them. That is handled by the Gateway and the Delivery Mechanism respectively.
+In that example the Use Case does not know how the lighting system works. The Use Case also does not know how the user starts the Use Case, and does not know how the user reads the errors. The [Gateway](gateway.md) knows the lighting system. The [Delivery Mechanism](learn/basics/delivery-mechanism-101.md) knows the user.
 
-It's not hard to imagine this being called by a button with a red error light, nor is it hard to imagine it used by an iOS application with TouchID activation. 
+A button with a red error light can call this Use Case. An iOS application with TouchID can call the same Use Case.
 
 ## Properties of Use Cases
 
-* Each use case should be Framework and Database agnostic. 
-* Use Cases define an interface (implicit in Ruby) that must be fulfilled by a Gateway
-  * That interface is expressed in [Domain](domain.md) objects — a Gateway returns Domain objects and accepts Domain objects to save. See [Gateway](gateway.md).
-* Use Cases expose a request, response interface which are defined as simple data structures (Hashes or Structs)
-  * In the Presenter pattern the Responses should always be simple data structures.
+* A Use Case does not depend on a framework or on a database.
+* A Use Case defines an interface that a Gateway must fulfil. In Ruby that interface is implicit.
+  * The interface is expressed in [Domain](domain.md) objects. A Gateway returns Domain objects, and a Gateway accepts Domain objects to save. See [Gateway](gateway.md).
+* A Use Case exposes a request interface and a response interface. Both are simple data structures, such as a hash or a struct.
+  * In the presenter pattern the response is always a simple data structure.
 
 ## Alternative names
 
-* In Ivar Jacobson's BCE architecture these are the "Controls".
-* Martin Fowler has a concept called "Transaction Scripts".
-* In Uncle Bob's terminology these are "Interactors".
+* Ivar Jacobson's BCE architecture calls these "Controls".
+* Martin Fowler describes a related idea called a "Transaction Script".
+* Robert C. Martin calls these "Interactors".
 * "Operations"
 * "Commands"
 
-In Made Tech Flavour Clean Architecture we stick to the name "UseCase"
+Made Tech Flavour Clean Architecture uses the name "UseCase".

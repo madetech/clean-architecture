@@ -4,15 +4,15 @@ title: Extend Use Case behaviour with Domain objects
 
 # Extend Use Case behaviour with Domain objects
 
-When you start building a Clean Architecture system, the advice is to keep your domain objects simple — just data, minimal behaviour. Let the use cases carry the logic. This is deliberate.
+At the start of a Clean Architecture system, keep your Domain objects simple. A Domain object holds data and little behaviour. The Use Cases hold the logic. That order is deliberate.
 
-As [domain.md](../../domain.md) puts it: _it is cheaper to specialise Use Cases, resulting in an anemic domain model, then evolve the systems towards generalisations once patterns emerge._
+[domain.md](../../domain.md) states the rule: _specialise Use Cases first. Specialised Use Cases produce an anemic domain model. Move behaviour into a Domain object after the same pattern appears in more than one Use Case._
 
-This guide is about recognising when those patterns have emerged, and moving logic into the domain.
+This guide shows you how to recognise that pattern, and how to move the logic into the domain.
 
-## Starting point: logic in the use case
+## Starting point: logic in the Use Case
 
-Early on, a pricing rule lives in the use case that needs it:
+Early on, a pricing rule belongs in the Use Case that needs the rule:
 
 ```ruby
 class PlaceOrder
@@ -26,11 +26,11 @@ class PlaceOrder
 end
 ```
 
-This is fine. One use case, one place the rule lives.
+This is correct. One Use Case holds the rule, in one place.
 
-## The signal: duplication across use cases
+## The signal: duplication across Use Cases
 
-A second use case needs the same rule:
+A second Use Case needs the same rule:
 
 ```ruby
 class UpdateOrder
@@ -44,11 +44,11 @@ class UpdateOrder
 end
 ```
 
-The bulk discount rule is now in two places. When the discount threshold changes from 10 to 20, both use cases need updating. Miss one, and the system is inconsistent.
+The bulk discount rule is now in two places. When the threshold changes from 10 to 20, you must change both Use Cases. Miss one Use Case, and the system gives two different answers.
 
-This is the signal: a rule that must be valid for multiple use cases belongs in the domain.
+That duplication is the signal. A rule that must be correct for more than one Use Case belongs in the domain.
 
-## Moving logic into a domain object
+## Moving logic into a Domain object
 
 ```ruby
 class OrderPricing
@@ -75,7 +75,7 @@ class OrderPricing
 end
 ```
 
-Both use cases simplify to:
+Both Use Cases become shorter:
 
 ```ruby
 class PlaceOrder
@@ -95,11 +95,11 @@ class UpdateOrder
 end
 ```
 
-The rule has one home. Use cases become orchestrators — they coordinate the flow, but the knowledge belongs to the domain.
+The rule now has one home. Each Use Case becomes an orchestrator that coordinates the flow. The Domain object holds the knowledge.
 
-## Testing the domain object independently
+## Testing the Domain object independently
 
-Domain objects have no gateways and no use case dependencies. They are the easiest things in your system to test:
+A Domain object has no Gateway and no Use Case dependency. A Domain object is the easiest part of your system to test:
 
 ```ruby
 describe OrderPricing do
@@ -119,13 +119,13 @@ describe OrderPricing do
 end
 ```
 
-No setup, no doubles, no gateways. Fast, isolated, and focused on the rule itself.
+The test needs no setup, no test double and no Gateway. The test is fast, isolated, and directed at the rule.
 
 ## Polymorphic behaviour from the database
 
-Domain objects can go further than holding shared rules. By constructing different domain object types from database data, the gateway can make behaviour vary based on persistent state — without the use case ever needing to know which type it is working with.
+A Domain object does more than hold a shared rule. When the Gateway constructs a different Domain object type from the stored data, the behaviour varies with the stored state, and the Use Case never learns which type it received.
 
-Consider customer pricing tiers. A naive use case branches on a tier flag:
+Consider customer pricing tiers. A first Use Case branches on a tier flag:
 
 ```ruby
 class PlaceOrder
@@ -145,11 +145,11 @@ class PlaceOrder
 end
 ```
 
-Every time a new tier is introduced the use case must change. Adding a `'vip'` tier means finding and updating every use case that prices orders.
+Every new tier forces a change to that Use Case. A `'vip'` tier means you must find and change every Use Case that prices an order.
 
-### Encode the variation in domain objects
+### Encode the variation in Domain objects
 
-Define a class per tier, each responding to the same interface:
+Write one class per tier. Each class responds to the same interface:
 
 ```ruby
 class StandardCustomer
@@ -175,11 +175,11 @@ class WholesaleCustomer
 end
 ```
 
-The gateway reads the `tier` column and constructs the right type. Two style points matter here:
+The Gateway reads the `tier` column and constructs the right type. Two style points apply here:
 
-**Prefer a lookup hash over a case statement.** A case statement requires modifying existing code to add a new branch — it is closed to extension. A lookup hash is open to extension: adding a new tier means adding one entry to the hash, leaving existing entries untouched. It is also easier to scan.
+**Use a lookup hash instead of a case statement.** A case statement needs a new branch inside existing code, so a case statement is closed to extension. A lookup hash is open to extension: a new tier means one new entry, and the existing entries stay as they are. A lookup hash is also faster to read.
 
-**Use constructor lambdas rather than calling `.new` on the class directly.** Different domain object types may have different constructor parameters — `WholesaleCustomer` needs an `account_manager_id` that `StandardCustomer` does not. Storing lambdas instead of classes keeps the call site uniform (`constructor.call(row)`) while letting each lambda pass exactly the data its type requires.
+**Store a constructor lambda instead of the class itself.** Each Domain object type takes different constructor parameters. `WholesaleCustomer` needs an `account_manager_id`, and `StandardCustomer` does not. A lambda keeps the call site the same for every type, which is `constructor.call(row)`, and lets each lambda pass the data that its own type needs.
 
 ```ruby
 class SequelCustomerGateway
@@ -197,7 +197,7 @@ class SequelCustomerGateway
 end
 ```
 
-The use case no longer needs to know what type of customer it has:
+The Use Case no longer needs to know which type of customer it holds:
 
 ```ruby
 class PlaceOrder
@@ -211,11 +211,11 @@ class PlaceOrder
 end
 ```
 
-Adding a `VipCustomer` with a 50% discount rate requires a new class and one new entry in `TIER_CONSTRUCTORS`. The use case, `UpdateOrder`, and any other use case that prices orders are untouched.
+A `VipCustomer` with a 50% discount rate needs a new class and one new entry in `TIER_CONSTRUCTORS`. `PlaceOrder`, `UpdateOrder` and every other Use Case that prices an order need no change.
 
 ### Testing
 
-Each domain class is trivial to test in isolation:
+Each Domain class is simple to test on its own:
 
 ```ruby
 describe WholesaleCustomer do
@@ -227,9 +227,9 @@ end
 
 ### Extracting a Builder
 
-Sooner or later a second gateway needs to build the same customers — an HTTP gateway onto another service, a CSV importer, a read-replica gateway. Referencing `SequelCustomerGateway::TIER_CONSTRUCTORS` from that second gateway creates a dependency from one persistence implementation onto another, which neither should have.
+A second Gateway will need to build the same customers: an HTTP Gateway onto another service, a CSV importer, or a read-replica Gateway. A reference to `SequelCustomerGateway::TIER_CONSTRUCTORS` from that second Gateway makes one persistence implementation depend on another. Neither Gateway may depend on the other.
 
-Extract the construction logic into a dedicated builder:
+Move the construction code into a builder:
 
 ```ruby
 class CustomerBuilder
@@ -246,7 +246,7 @@ class CustomerBuilder
 end
 ```
 
-Every gateway that reads stored data delegates to the builder — none owns the construction logic, and none depends on another:
+Every Gateway that reads stored data calls the builder. No Gateway owns the construction code, and no Gateway depends on another Gateway:
 
 ```ruby
 class SequelCustomerGateway
@@ -262,7 +262,7 @@ class HttpCustomerGateway
 end
 ```
 
-The Fake needs no builder at all. It is handed `Customer` domain objects to save and hands the same objects back:
+The Fake needs no builder. The Fake receives `Customer` Domain objects to save, and returns the same objects:
 
 ```ruby
 class InMemoryCustomerGateway
@@ -276,14 +276,14 @@ class InMemoryCustomerGateway
 end
 ```
 
-That is worth dwelling on. Because every gateway — real or Fake — accepts and returns domain objects, the Fake has nothing to translate. The builder is only needed where stored data has to be turned back into a domain object, and that is a concern of gateways that read stored data, not of the domain or of any use case.
+Read that again. Every Gateway, real or Fake, accepts and returns Domain objects, so the Fake has nothing to translate. A builder is needed only where stored data must become a Domain object again. That is the concern of a Gateway that reads stored data, not of the domain and not of any Use Case.
 
-Adding a new tier now means: a new domain class, one new entry in `CustomerBuilder::CONSTRUCTORS`. Nothing else changes — not any gateway, not the Fake, not any use case.
+A new tier now means a new Domain class and one new entry in `CustomerBuilder::CONSTRUCTORS`. Nothing else changes: no Gateway, no Fake, and no Use Case.
 
-The builder can also be tested independently to verify it produces the right type for each tier value.
+You can also test the builder on its own, to check that the builder produces the right type for each tier value.
 
 ## The guiding question
 
-Before moving logic into the domain, ask: _must this rule hold for all use cases across the system?_
+Before you move logic into the domain, ask one question: _must this rule hold for every Use Case in the system?_
 
-If the rule is specific to one use case, it belongs in the use case. If it is a constraint on the domain itself — something that would be wrong regardless of which use case triggered it — it belongs in the domain. And if the rule varies based on data, encode that variation in domain object types and let the gateway decide which to construct.
+A rule that applies to one Use Case belongs in that Use Case. A rule that constrains the domain itself, and that would be wrong whichever Use Case triggered it, belongs in the domain. A rule that varies with the stored data belongs in a set of Domain object types, and the Gateway chooses which type to construct.

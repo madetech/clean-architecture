@@ -1,6 +1,5 @@
 ---
-title: Clean Architecture: Kotlin Domain
+title: "Clean Architecture: Kotlin Domain"
 ---
 
 # Domain
-

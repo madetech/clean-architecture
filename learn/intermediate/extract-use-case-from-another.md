@@ -4,9 +4,9 @@ title: Extracting a Use Case from a Use Case
 
 # Extracting a Use Case from a Use Case
 
-A use case should do one thing. As systems grow, what started as one thing often quietly becomes two or three. The tell is length — and the feeling that testing this use case requires setting up far too much.
+A Use Case does one thing. As a system grows, one thing becomes two or three. Two signs tell you that this has happened: the Use Case is long, and a test of the Use Case needs a large amount of setup.
 
-## The smell
+## The problem
 
 ```ruby
 class PlaceOrder
@@ -34,11 +34,11 @@ class PlaceOrder
 end
 ```
 
-`PlaceOrder` has four dependencies and is doing three distinct things: saving the order, sending a confirmation, and updating inventory. To test it in isolation you must arrange four collaborators. A change to how notifications are sent requires touching an order use case.
+`PlaceOrder` has four dependencies and does three separate things: `PlaceOrder` saves the order, sends a confirmation, and updates the inventory. A test of `PlaceOrder` must arrange four collaborators. A change to the way the system sends a notification forces a change to an order Use Case.
 
-## Extracting collaborator use cases
+## Extracting collaborator Use Cases
 
-Pull each concern into its own use case:
+Move each concern into its own Use Case:
 
 ```ruby
 class NotifyOrderPlaced
@@ -72,7 +72,7 @@ class ReserveInventory
 end
 ```
 
-`PlaceOrder` becomes an orchestrator, with the extracted use cases injected as collaborators — exactly like gateways:
+`PlaceOrder` becomes an orchestrator. The extracted Use Cases arrive as collaborators, in the same way that a Gateway arrives as a collaborator:
 
 ```ruby
 class PlaceOrder
@@ -93,24 +93,24 @@ end
 
 ## When extraction makes sense
 
-Extraction is worthwhile when:
+Extract a Use Case when one of these is true:
 
-- **The extracted use case needs to be called directly** by a delivery mechanism or API in its own right. If `ReserveInventory` can also be triggered by a warehouse management interface, it earns its own existence as a first-class use case.
-- **The code is genuinely too complicated** to reason about or test as one unit. Four dependencies and fifty lines is a signal worth acting on.
+- **A Delivery Mechanism or an API needs to call the extracted Use Case directly.** A warehouse management interface that triggers `ReserveInventory` makes `ReserveInventory` a Use Case in its own right.
+- **The code is too complicated to read or to test as one unit.** Four dependencies and fifty lines is enough to act on.
 
-## The downsides
+## The costs
 
-Extraction is not a panacea. It comes with real costs:
+Extraction is not free. Extraction has two costs.
 
-**Sharing information between use cases becomes harder.** When logic lives in one use case, intermediate values computed early can be used later. Once you split across use cases, each invocation starts fresh. You end up passing more data through the interface, or reading data a second time that you have already read.
+**Sharing data between Use Cases becomes harder.** One Use Case can compute a value early and read that value later. Two Use Cases cannot. Each call starts again, so you pass more data through the interface, or you read the same data a second time.
 
-**More database calls.** Domain objects cannot be shared across use case boundaries without breaking the architectural philosophy — a domain object that escapes a use case is a leaked internal (see [Don't leak your internals](../basics/do-not-leak-your-internals.md)). This means each extracted use case may reload data the orchestrating use case already has. In the example above, if `NotifyOrderPlaced` needs order details that `PlaceOrder` already computed, it must fetch them again.
+**The system makes more database calls.** A Domain object must not cross a Use Case boundary, because a Domain object that leaves a Use Case is a leaked internal. See [Do not leak your internals](../basics/do-not-leak-your-internals.md). Each extracted Use Case therefore reloads data that the orchestrating Use Case already holds. In the example above, `NotifyOrderPlaced` reads the order details again if it needs them.
 
-Apply extraction when the benefits — reusability, testability, separation of concerns — outweigh these costs. Not every large use case needs to be split.
+Extract a Use Case when the benefits, which are reuse, testability and separation of concerns, are worth these two costs. Not every large Use Case needs a split.
 
 ## Testing each piece independently
 
-Each use case can be tested with stub collaborators rather than a full wiring:
+Test each Use Case with stub collaborators instead of the full wiring:
 
 ```ruby
 describe PlaceOrder do
@@ -138,11 +138,11 @@ describe PlaceOrder do
 end
 ```
 
-`NotifyOrderPlaced` and `ReserveInventory` each get their own focused test with only the collaborators they actually need.
+`NotifyOrderPlaced` and `ReserveInventory` each get their own test, with only the collaborators that each one needs.
 
 ## Wiring it together
 
-In your [dependency factory](./keep-your-wiring-DRY.md), compose the use cases. Use a lookup hash rather than a case statement — adding a new use case means adding an entry, not modifying a branch:
+Compose the Use Cases in your [dependency factory](./keep-your-wiring-DRY.md). Use a lookup hash instead of a case statement. A new Use Case then means a new entry, not a change to an existing branch:
 
 ```ruby
 def use_cases
@@ -168,13 +168,13 @@ def get_use_case(name)
 end
 ```
 
-Each use case remains individually accessible — `notify_order_placed` can be triggered by other use cases or delivery mechanisms without duplication.
+Each Use Case stays available on its own. Another Use Case or another Delivery Mechanism calls `notify_order_placed` without any duplication.
 
 ## An alternative: the event publisher
 
-Direct injection of collaborator use cases means `PlaceOrder` must know the names of every downstream use case it triggers. Adding `UpdateLoyaltyPoints` as a new consequence of placing an order means changing `PlaceOrder`.
+When you inject collaborator Use Cases directly, `PlaceOrder` knows the name of every downstream Use Case. Adding `UpdateLoyaltyPoints` as a new consequence of placing an order forces a change to `PlaceOrder`.
 
-An event publisher inverts this. `PlaceOrder` publishes a signal; downstream use cases subscribe to it. `PlaceOrder` no longer knows what cares about its outcome.
+An event publisher inverts that dependency. `PlaceOrder` publishes an event. Each downstream Use Case subscribes to the event. `PlaceOrder` then knows nothing about what reacts to its outcome.
 
 ```ruby
 class PlaceOrder
@@ -210,7 +210,7 @@ class EventPublisher
 end
 ```
 
-Subscriptions are wired up in the [dependency factory](./keep-your-wiring-DRY.md):
+Wire the subscriptions in the [dependency factory](./keep-your-wiring-DRY.md):
 
 ```ruby
 def event_publisher
@@ -220,10 +220,10 @@ def event_publisher
 end
 ```
 
-Adding `UpdateLoyaltyPoints` as a new subscriber requires one new line in the factory. `PlaceOrder` is untouched.
+Adding `UpdateLoyaltyPoints` as a new subscriber takes one new line in the factory. `PlaceOrder` needs no change.
 
-The same downsides around database calls and information sharing apply — each subscriber starts fresh and may re-read data. But the coupling between `PlaceOrder` and its downstream consequences is eliminated entirely.
+The two costs above still apply. Each subscriber starts again and can read the same data twice. The coupling between `PlaceOrder` and its downstream Use Cases is gone.
 
-## From the trenches
+## In practice
 
-Extracted use cases are easier to replace. If notification sending moves to a background queue, only `NotifyOrderPlaced` changes — as long as the new implementation still responds to `execute`. With an event publisher, that swap happens in the factory without touching any use case at all.
+An extracted Use Case is easier to replace. When notification sending moves to a background queue, only `NotifyOrderPlaced` changes, as long as the new implementation still responds to `execute`. With an event publisher, that swap happens in the factory, and no Use Case changes at all.

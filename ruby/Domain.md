@@ -1,6 +1,5 @@
 ---
-title: Clean Architecture Ruby: Domain
+title: "Clean Architecture Ruby: Domain"
 ---
 
 # Domain
-

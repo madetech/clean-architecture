@@ -1,6 +1,10 @@
+---
+title: Constructors are for collaborators
+---
+
 # Constructors for collaborators
 
-Consider a use case class, such as the following:
+Consider a Use Case class, such as the following:
 
 ```ruby
 class CreateOrder
@@ -12,13 +16,13 @@ class CreateOrder
 end
 ```
 
-What should be a parameter for the initializer (the constructor) and what should be a parameter for the execute method?
+Which parameter belongs on the initializer, which is the constructor, and which parameter belongs on the `execute` method?
 
 ## A non-reentrant example
 
-A fairly typical design is to pass everything to the constructor.
+A common design passes everything to the constructor.
 
-Lets also assume a Clean Architecture design, and for familiarity that we are using Rails, and see what it looks like in a controller...
+Assume a Clean Architecture design, and assume Rails for familiarity. A controller then looks like this:
 
 ```ruby
 class OrderController < ApplicationController
@@ -29,15 +33,15 @@ class OrderController < ApplicationController
 end
 ```
 
-This has one particular downside in that you must have both a reference to the gateway and the request at the callsite to `.execute`.
+This design has one downside. The call site of `.execute` must hold a reference to the Gateway and a reference to the request.
 
-To understand why this is an issue, lets look at a reentrant example.
+The next example shows why that is a problem.
 
 ## A reentrant example
 
-We pass the request at the `.execute` callsite, and pass the gateway to the constructor.
+Pass the request at the `.execute` call site, and pass the Gateway to the constructor.
 
-Consider the following controller...
+Consider the following controller:
 
 ```ruby
 class OrderController < ApplicationController
@@ -47,15 +51,15 @@ class OrderController < ApplicationController
 end
 ```
 
-What this has enabled us to do is separate the construction of our objects, from the usage of the object.
+This design separates the construction of your objects from the use of your objects.
 
-To say this another way, we can write controllers that are entirely unaware of the `order_gateway` dependency.
+The controller now knows nothing about the `order_gateway` dependency.
 
 This is the interface segregation principle at work.
 
-## But...
+## An alternative
 
-I could just make `order_gateway` an instance variable? Like this...
+You could make `order_gateway` an instance variable instead:
 
 ```ruby
 class OrderController < ApplicationController
@@ -65,18 +69,18 @@ class OrderController < ApplicationController
 end
 ```
 
-Yes you could. And this is certainly better, in terms of code reuse.
+That design reuses more code than the first example.
 
-There are two downsides
+That design still has two downsides:
 
-- There is a source code dependency on the `CreateOrder` class constant. (Dependency Inversion Principle violation)
-- Knowledge of an unnecessary dependency `@order_gateway`. (Interface Segregation Principle violation) 
+- The controller holds a source code dependency on the `CreateOrder` class constant. This breaks the dependency inversion principle.
+- The controller knows about the `@order_gateway` dependency, and the controller does not need that knowledge. This breaks the interface segregation principle.
 
-Both of these facts make it harder to unit test this `OrderController`.
+Both downsides make `OrderController` harder to unit test.
 
 ## Sinatra
 
-Lets assume we're using Sinatra for a moment and lets consider the following code...
+Assume Sinatra instead of Rails, and consider the following code:
 
 ```ruby
 post '/add-user' do
@@ -87,17 +91,16 @@ post '/add-user' do
 end
 ```
 
-We have created an MVC structure without Rails. We have a Controller, bound to a route `/add-user`.
+This code builds an MVC structure without Rails. The code binds a controller to the route `/add-user`.
 
-This controller has explicit dependencies, passed in via the constructor parameters. 
+The controller declares its dependencies as constructor parameters. 
 
-All request parameters are passed in via parameters to the `.execute` method.
+The route passes every request parameter to the `.execute` method.
 
-This controller is now isolated from Sinatra - we can unit test it without the framework, and without the business rules.
+The controller is now isolated from Sinatra. You can unit test the controller without the framework, and without the business rules.
 
 ## Conclusion
 
-By making constructors for collaborators only (Dependencies), we are able to seperate construction from the usage of objects. 
+Put collaborators, which are the dependencies, on the constructor only. Construction then stays separate from the use of the object.
 
-This fact makes it easier to decouple aspects of your system for easier testing, and have the flexibility to compose them.
-
+That separation decouples parts of your system, makes each part easier to test, and lets you compose the parts in different ways.

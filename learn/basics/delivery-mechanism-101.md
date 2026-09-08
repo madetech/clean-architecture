@@ -4,15 +4,15 @@ title: Your first Delivery Mechanism
 
 # Your first Delivery Mechanism
 
-A delivery mechanism is whatever sits between the outside world and your use cases. It receives an external event — an HTTP request, a CLI command, a message off a queue — and translates it into a use case call.
+A Delivery Mechanism sits between the outside world and your Use Cases. A Delivery Mechanism receives an external event, such as an HTTP request, a CLI command, or a message from a queue, and turns that event into a Use Case call.
 
-## The job of a delivery mechanism
+## The job of a Delivery Mechanism
 
-1. Translate the incoming request into use case input
-2. Call the use case
-3. Translate the use case response into an output
+1. Translate the incoming request into Use Case input
+2. Call the Use Case
+3. Translate the Use Case response into an output
 
-That is all. A delivery mechanism contains no business logic and has no knowledge of gateways.
+A Delivery Mechanism does nothing else. A Delivery Mechanism holds no business logic, and knows nothing about Gateways.
 
 ## A simple example
 
@@ -27,11 +27,11 @@ post '/orders' do
 end
 ```
 
-The route knows about HTTP (params, JSON response). It does not know about `Order`, `OrderGateway`, or how `CreateOrder` works internally.
+The route knows about HTTP, which means the params and the JSON response. The route does not know about `Order`, about `OrderGateway`, or about how `CreateOrder` works inside.
 
 ## Extracting a controller class
 
-For anything beyond a trivial route, extract a controller class. This makes the delivery mechanism testable independently of the HTTP framework.
+Extract a controller class for any route that does more than the example above. A controller class makes the Delivery Mechanism testable without the HTTP framework.
 
 ```ruby
 module Delivery
@@ -52,9 +52,9 @@ module Delivery
 end
 ```
 
-The controller has `create_order` injected as a collaborator, following the [constructors for collaborators](./constructors-for-collaborators.md) pattern. It is entirely unaware of how the use case is wired up or what gateway it uses.
+The controller receives `create_order` as a collaborator, which follows the [constructors for collaborators](./constructors-for-collaborators.md) pattern. The controller does not know how the Use Case is wired up, and does not know which Gateway the Use Case uses.
 
-The Sinatra route becomes thin glue:
+The Sinatra route becomes three lines:
 
 ```ruby
 post '/orders' do
@@ -65,9 +65,9 @@ post '/orders' do
 end
 ```
 
-## Testing a delivery mechanism
+## Testing a Delivery Mechanism
 
-Because the controller accepts its use case as a dependency, you can test it in isolation by injecting a Stub:
+The controller accepts its Use Case as a dependency, so you test the controller in isolation with a Stub:
 
 ```ruby
 describe Delivery::CreateOrderController do
@@ -82,16 +82,16 @@ describe Delivery::CreateOrderController do
 end
 ```
 
-No HTTP stack, no database, no real use case. Just the translation logic under test.
+The test needs no HTTP stack, no database and no real Use Case. The test covers the translation code only.
 
-## What must not live here
+## What must not go here
 
-- **Business logic**: if an order over £100 gets free shipping, that belongs in a use case or domain object
-- **Gateway knowledge**: the controller should not know what database you are using or how to construct one
-- **Authorisation rules**: covered separately in [Authorisation](../../intermediate/authorisation.md)
+- **Business logic**: a rule such as free shipping on an order over £100 belongs in a Use Case or in a Domain object
+- **Gateway knowledge**: the controller must not know which database you use, and must not construct a Gateway
+- **Authorisation rules**: see [Authorisation](../intermediate/authorisation.md)
 
-## From the trenches
+## In practice
 
-The most common mistake is letting the delivery mechanism grow. It starts with a small conditional — "if the user is an admin, show a slightly different response" — and within a few months the controller is 200 lines and contains half your business rules.
+The most common mistake is to let the Delivery Mechanism grow. The growth starts with one small conditional, such as a different response for an administrator. A few months later the controller holds 200 lines and half of your business rules.
 
-Keep delivery mechanisms so thin that there is almost nothing left to test. If you find yourself writing complex setup for a controller test, the logic probably belongs in a use case.
+Keep each Delivery Mechanism thin enough that almost nothing is left to test. Complex setup in a controller test tells you that the logic belongs in a Use Case.

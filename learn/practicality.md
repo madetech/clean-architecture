@@ -1,33 +1,33 @@
 # Practicality
 
-The system structure of Made Tech Flavour Clean Architecture is optimised for the set of systems that we would commonly build.
+The structure of Made Tech Flavour Clean Architecture suits the systems that Made Tech builds most often.
 
-It has been used successfully to build systems of the following styles:
+Made Tech has built these styles of system with it:
 
 - HTTP APIs
 - Event-driven GUIs
 - Web applications with server-side rendering
-- HTTP Middleware (integrating multiple APIs)
-- Event-driven systems (using Message Queues)
+- HTTP middleware that integrates several APIs
+- Event-driven systems that use message queues
 
-Some (limited) exploration has been made using it for:
+Made Tech has done limited work with it on:
 
 - Games programming
 - Embedded programming
 
-## Rule: one use case per file
+## Rule: one Use Case per file
 
-This aspect of the style can cause issues when building reusable libraries.
+This rule causes problems when you build a reusable library.
 
-Typically you will see this rule being ignored, or a facade pattern employed to optimise the API for ease-of-use.
+Library authors either ignore the rule, or add a facade that makes the public API easier to call.
 
-For workloads that already have a well-known architecture e.g. a Compiler, it may be desirable to employ that architecture instead.
+Some workloads already have a well-known architecture, such as a compiler. Use that architecture instead.
 
 ## Rule: use object composition over class inheritance
 
-One way to provide plugin points is to allow the delivery mechanism to inherit from the high-level policy.
+One way to provide a plugin point is to let the Delivery Mechanism inherit from the high-level policy.
 
-Imagine you needed to switch on a light, you could use the template method pattern
+Consider a system that switches a light on. The template method pattern gives you one way to build it.
 
 Consider the following pseudocode:
 
@@ -43,15 +43,15 @@ abstract class LightFlasher
 end
 ```
 
-The real light flasher system could then extend this to create the concrete light flasher. This can be a simple alternative to composition (typically a gateway).
+The real light flasher then extends `LightFlasher`. Inheritance is a simple alternative to composition, and composition usually means a Gateway.
 
 ## In Haskell
 
-In Haskell, the most flexible way to implement Clean Architecture is to define a Free Monad with the impure operations that your business rules need to operate on.
+In Haskell, define a Free Monad that holds the impure operations your business rules need.
 
-In production you will use a Free Monad interpreter that connects to the real impure operations.
+In Production, run a Free Monad interpreter that calls the real impure operations.
 
-In unit tests, you will use an interpreter that is actually pure (a test double!), which enables you to test code that encodes impure operations.
+In unit tests, run an interpreter that is pure. A pure interpreter is a test double, and it lets you test code that describes impure operations.
 
 Consider the following pseudocode:
 
@@ -59,18 +59,16 @@ Consider the following pseudocode:
 createOrUpdate personExists createPerson person = if !personExists(person) then createPerson(person) && true else false
 ```
 
-Since personExists must perform IO (to fetch from a database), and we either perform some IO or not. This function _must_ be impure.
-This makes it difficult to test.
+`personExists` reads from a database, so `personExists` performs IO. That makes `createOrUpdate` impure, and an impure function is hard to test.
 
-Free Monads provide a way to represent this impure operation as pure data.
+A Free Monad represents an impure operation as pure data.
 
 ## Conclusion
 
-This is why Robert C. Martin intentionally speaks about Clean Architecture in the abstract.
+Robert C. Martin describes Clean Architecture in the abstract for this reason.
 
-The _general principle_ of Clean Architecture is to have high-level policy (i.e. Business Rules) not depend on low-level details (e.g. how to speak to PostgreSQL). 
+The general principle of Clean Architecture is that high-level policy, meaning the business rules, does not depend on low-level detail, such as how to talk to PostgreSQL.
 
-If you achieve this goal through careful use of language features, and your system is working and easy to maintain you have achieved a "Clean Architecture".
+Reach that goal with the features of your language. If your system works and stays easy to change, you have a Clean Architecture.
 
-What we do in Made Tech Flavoured Clean Architecture is blend a mix of Domain-Driven-Design, optimise for ATDD, and ease of project navigation given a large number of use cases.
-
+Made Tech Flavour Clean Architecture adds three things to that principle: parts of Domain-Driven Design, a structure that suits ATDD, and a directory layout that stays easy to navigate as the number of Use Cases grows.

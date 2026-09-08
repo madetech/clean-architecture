@@ -1,14 +1,18 @@
+---
+title: Writing Fake Gateways
+---
+
 # Fake Gateways
 
-When building out Acceptance Tests, it is useful to use Fake [test doubles](https://learn.madetech.com/core-skills/tdd/test-doubles.html) to stand in for real gateways.
+When you write acceptance tests, use a Fake [test double](https://learn.madetech.com/core-skills/tdd/test-doubles.html) in place of a real Gateway.
 
-This gives you the ability to explore the domain, and the associated business rules with the customer while building real code.
+A Fake lets you explore the domain and the business rules with the customer while you write real code.
 
-Once you understand the domain, you can then make an informed decision about technology choices for persistence.
+Choose your persistence technology after you understand the domain.
 
 ## Simplistic Gateway
 
-Using an array as a backing store, a lot of early gateways might follow this pattern. 
+An early Gateway often uses an array as the store:
 
 ```ruby
 class InMemoryOrderGateway
@@ -31,7 +35,9 @@ class InMemoryOrderGateway
 end
 ```
 
-Note that the Fake honours the same interface as a real gateway will: it accepts an `Order` [Domain](../../domain.md) object to save, and hands `Order` objects back when read. Because it stores the Domain objects it was given, there is no mapping code at all — which is exactly why a Fake is cheap to write. What it must not do is expose a *different* interface to the use case, such as taking `customer_id:` and `items:` instead of an `Order`. If it does, swapping in a [real gateway](./gateway-101.md) later means changing every use case too.
+The Fake exposes the same interface as the real Gateway. The Fake accepts an `Order` [Domain](../../domain.md) object to save, and returns `Order` objects when the Use Case reads. The Fake stores the Domain objects it receives, so the Fake needs no mapping code. That is why a Fake is cheap to write.
+
+The Fake must not expose a *different* interface to the Use Case. A Fake that takes `customer_id:` and `items:` instead of an `Order` forces you to change every Use Case when you swap in a [real Gateway](./gateway-101.md).
 
 ## As part of an acceptance test
 
@@ -72,13 +78,12 @@ end
 
 ## An outer loop, made simple by Fakes
 
-Acceptance Test Driven Development creates an outer loop around your TDD discipline.
+Acceptance Test Driven Development puts an outer loop around your TDD discipline.
 
 1. Write a failing acceptance test
 2. Write the next simplest failing unit test
-3. Write the simplest production code to make the unit test pass
+3. Write the simplest production code that makes the unit test pass
 4. Refactor
-5. Does the acceptance test pass? If *yes* goto 1, *else* goto 2
+5. Run the acceptance test. If the acceptance test passes, go to step 1. If the acceptance test fails, go to step 2.
 
-Using a Fake test double to stand in for your persistence layer, enables you to exploring both the _domain_ without exploring the _persistence layer_ at the same time. 
-
+A Fake test double stands in for your persistence layer. The Fake lets you explore the _domain_ without exploring the _persistence layer_ at the same time.

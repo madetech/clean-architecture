@@ -1,10 +1,10 @@
 ---
-title: Clean Architecture Ruby: Use Cases
+title: "Clean Architecture Ruby: Use Cases"
 ---
 
 # Use Cases
 
-Standard Directory: use_case/
+Standard directory: `use_case/`
 
 ## Libraries
 
@@ -23,7 +23,7 @@ module AcmeIndustries
            # widgets is a collection of Domain::Widget objects
            widgets = widget_gateway.all
 
-           # secret sauce here
+           # the report rules go here
            
            {} # return a hash
         end
@@ -32,4 +32,3 @@ module AcmeIndustries
   end
 end
 ```
-

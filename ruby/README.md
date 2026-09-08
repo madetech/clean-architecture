@@ -1,5 +1,5 @@
 ---
-title: Clean Architecture: Ruby
+title: "Clean Architecture: Ruby"
 ---
 
 # Made Tech Flavour Clean Architecture: Ruby
@@ -12,9 +12,9 @@ title: Clean Architecture: Ruby
 ## Production Code
 ``` (lib|src)/<insert customer name here>/**/*.rb```
 
-Customer code should be housed within a Client namespace e.g. ```AcmeIndustries::Financial::UseCase::CreateInvoice```
+Put customer code in a client namespace, such as ```AcmeIndustries::Financial::UseCase::CreateInvoice```
 
-Non-customer specfic code should be housed within a MadeTech namespace e.g. ```MadeTech::Authentication::UseCase::Login```
+Put code that no single customer owns in the MadeTech namespace, such as ```MadeTech::Authentication::UseCase::Login```
 
 * [Use Cases](UseCases.md) use_case/ 
 * [Domain](Domain.md) domain/

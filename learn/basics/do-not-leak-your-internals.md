@@ -1,16 +1,16 @@
 ---
-title: Don't leak your internals!
+title: Do not leak your internals
 ---
 
-# Don't leak your internals!
+# Do not leak your internals
 
-Use cases sit at the boundary of your application. Anything that crosses that boundary — both coming in and going out — should be a plain data structure.
+A Use Case sits at the boundary of your application. Everything that crosses that boundary, inward and outward, must be a plain data structure.
 
-This rule is easy to follow for inputs (a hash of parameters). It is tempting to break for outputs — especially when you have a domain object sitting right there.
+The rule is easy to follow for input, because input is a hash of parameters. The rule is tempting to break for output, because the Use Case already holds a Domain object.
 
 ## What leaking looks like
 
-A use case that returns a domain object:
+Here is a Use Case that returns a Domain object:
 
 ```ruby
 class PlaceOrder
@@ -21,20 +21,20 @@ class PlaceOrder
   def execute(customer_id:, items:)
     order = Order.new(customer_id: customer_id, items: items)
     @order_gateway.save(order)
-    order  # leaking a domain object
+    order  # this leaks a Domain object
   end
 end
 ```
 
-The caller — a controller, a test, another use case — now has a direct dependency on `Order`. That means:
+The caller is a controller, a test, or another Use Case. That caller now depends on `Order` directly. Three problems follow:
 
-- It can call any method on `Order`, including ones you didn't intend to expose
-- Any change to `Order`'s interface (method names, return types) can break callers silently
-- Your acceptance tests will start to know about internals they have no business knowing about
+- The caller can call any method on `Order`, including a method you did not intend to expose
+- Any change to the interface of `Order`, such as a method name or a return type, can break the caller without a warning
+- Your acceptance tests start to know about internals that an acceptance test must not see
 
 ## What not leaking looks like
 
-Return a plain hash instead:
+Return a plain hash:
 
 ```ruby
 class PlaceOrder
@@ -50,18 +50,18 @@ class PlaceOrder
 end
 ```
 
-The caller gets back only what they need. The fact that an `Order` domain object exists is a private detail.
+The caller receives only the data the caller needs. The `Order` Domain object stays a private detail.
 
 ## Why this matters
 
-The use case boundary is a seam. Everything on the outside of that seam — delivery mechanisms, acceptance tests, other use cases — should be able to change independently of everything on the inside.
+The Use Case boundary is a seam. Everything outside that seam, meaning the Delivery Mechanisms, the acceptance tests and the other Use Cases, changes independently of everything inside the seam.
 
-When a domain object escapes, that seam is broken. You lose the ability to refactor your domain freely.
+A Domain object that escapes breaks the seam. You then lose the ability to refactor your domain freely.
 
-## From the trenches
+## In practice
 
-A common scenario: you refactor `Order` to rename `customer_id` to `customer`. You grep for `customer_id` to find all usages. You find it in three acceptance tests, two controllers, and an email formatter — none of which should know anything about `Order`.
+Consider this change: you rename `customer_id` to `customer` on `Order`. You search for `customer_id` to find every use. You find `customer_id` in three acceptance tests, two controllers and an email formatter. None of those files should know anything about `Order`.
 
-Had the use cases returned plain hashes, the change would have been contained inside the use case and gateway. The callers would have been untouched.
+If the Use Cases had returned a plain hash, the change would stay inside the Use Case and the Gateway. The callers would need no change.
 
-The cost of the refactor just went from one file to six. Every additional file that needs to change is another opportunity to introduce a defect — a missed reference, a wrong field name, a test that was updated incorrectly and now passes for the wrong reason. The more code that moves, the more likely something breaks.
+The rename now touches six files instead of one. Each extra file that changes adds a chance of a defect: a missed reference, a wrong field name, or a test that you update wrongly and that then passes for the wrong reason. More code that moves means more chance of a failure.

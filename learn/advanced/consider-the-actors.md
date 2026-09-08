@@ -4,9 +4,9 @@ title: Consider the Actors
 
 # Consider the Actors
 
-A use case serves one actor.
+A Use Case serves one actor.
 
-Name the actors before you name the use cases. If you name the use cases first, you write one class that serves three actors. That class then changes for three reasons, and each change risks the other two actors.
+Name the actors before you name the Use Cases. If you name the Use Cases first, you write one class that serves three actors. That class then changes for three reasons, and each change risks the other two actors.
 
 ## What an actor is
 
@@ -18,23 +18,23 @@ Use this test: an actor changes their mind on their own. The cheese supplier cha
 
 An actor is a role, not a person. One person can act as two actors. The same person fills the coffee machine and drinks the coffee. The two roles want different things, so they are two actors.
 
-## Use case analysis
+## Use Case analysis
 
 Do these steps in order.
 
 1. List the actors.
 2. For each actor, list the work that the actor asks the system to do.
 3. Write each item of work as `<Actor> <verb> <object>`.
-4. Give each item of work one use case class.
-5. Check each use case. Name the one actor who can ask for a change to it. If you name two actors, split the use case.
+4. Give each item of work one Use Case class.
+5. Check each Use Case. Name the one actor who can ask for a change to it. If you name two actors, split the Use Case.
 
-A UML use case diagram draws a stick figure for each actor, an oval for each use case, and a line from the actor to the use case. A table records the same information:
+A UML Use Case diagram draws a stick figure for each actor, an oval for each Use Case, and a line from the actor to the Use Case. A table records the same information:
 
-| Actor | Use case | Trigger | Result |
+| Actor | Use Case | Trigger | Result |
 | --- | --- | --- | --- |
 | The Brewer | `StartBrew` | The Brewer presses the Brew button | Water heats |
 
-An actor can own more than one use case. A use case serves only one actor. The relation is one to many, not many to many. A line from two actors to one oval is the fault this article shows you how to remove.
+An actor can own more than one Use Case. A Use Case serves only one actor. The relation is one to many, not many to many. A line from two actors to one oval is the fault this article shows you how to remove.
 
 ## The coffee maker
 
@@ -92,7 +92,7 @@ Three actors ask this machine for work.
 
 **The Brewer** fills the water and the grounds and presses the Brew button. The Brewer wants the machine to refuse a brew with an empty boiler, and to signal when the brew finishes.
 
-| Actor | Use case | Trigger | Result |
+| Actor | Use Case | Trigger | Result |
 | --- | --- | --- | --- |
 | The Brewer | `StartBrew` | The Brewer presses the Brew button | The valve closes and the boiler heats |
 | The Brewer | `FinishBrew` | The boiler runs empty | The boiler stops and the indicator lights |
@@ -100,7 +100,7 @@ Three actors ask this machine for work.
 | The Now Drinker | `ResumeBrew` | The pot sensor reports a pot | The valve closes and the boiler heats |
 | The Hot Drinker | `KeepCoffeeHot` | The pot sensor changes | The warmer plate heats or stops |
 
-Five use cases, three actors. The Brewer owns two use cases. Each use case still serves one actor.
+Five Use Cases, three actors. The Brewer owns two Use Cases. Each Use Case still serves one actor.
 
 ### The conflict
 
@@ -112,7 +112,7 @@ The Mark IV design opens the relief valve and stops the flow. The Now Drinker wi
 
 That decision belongs to the actors, not to the code. Record it. A reader of `PauseBrew` must be able to find out why the machine stops the brew instead of finishing it.
 
-### The use cases
+### The Use Cases
 
 ```ruby
 class StartBrew
@@ -197,9 +197,9 @@ class KeepCoffeeHot
 end
 ```
 
-Each use case now names its own gateways. `KeepCoffeeHot` does not know that a brew exists. `PauseBrew` does not know that a warmer plate exists.
+Each Use Case now names its own Gateways. `KeepCoffeeHot` does not know that a brew exists. `PauseBrew` does not know that a warmer plate exists.
 
-The hardware poll loop is the [delivery mechanism](../basics/delivery-mechanism-101.md). The poll loop reads the sensors and calls the use cases:
+The hardware poll loop is the [Delivery Mechanism](../basics/delivery-mechanism-101.md). The poll loop reads the sensors and calls the Use Cases:
 
 ```ruby
 class HardwarePoller
@@ -225,7 +225,7 @@ class HardwarePoller
 end
 ```
 
-The poll loop knows the hardware. The use cases know the rules. A change to the sensor polling rate does not touch a rule, and a change to a rule does not touch the poll loop.
+The poll loop knows the hardware. The Use Cases know the rules. A change to the sensor polling rate does not touch a rule, and a change to a rule does not touch the poll loop.
 
 ## Gilded Rose, solved
 
@@ -268,7 +268,7 @@ Five actors write into one method. The Concert Promoter asks for a new threshold
 
 ### The split
 
-One use case serves the Innkeeper:
+One Use Case serves the Innkeeper:
 
 ```ruby
 class UpdateInventory
@@ -285,7 +285,7 @@ class UpdateInventory
 end
 ```
 
-The other four actors do not get a use case. They get a [domain object](../intermediate/extend-with-domain.md) each. A domain object also serves one actor.
+The other four actors do not get a Use Case. They get a [Domain object](../intermediate/extend-with-domain.md) each. A Domain object also serves one actor.
 
 ```ruby
 class BackstagePass
@@ -330,7 +330,7 @@ class LegendaryItem
 end
 ```
 
-The gateway builds the right domain object for each row. `UpdateInventory` calls `pass_a_day` and never reads a name.
+The Gateway builds the right Domain object for each row. `UpdateInventory` calls `pass_a_day` and never reads a name.
 
 ### What each actor now touches
 
@@ -338,33 +338,33 @@ The gateway builds the right domain object for each row. `UpdateInventory` calls
 | --- | --- | --- |
 | The Concert Promoter | Add 4 when 3 days or less remain | `backstage_pass.rb` |
 | The Cheese Supplier | Aged Brie stops at 40 | `aged_brie.rb` |
-| The Conjurer | Add a new Conjured item type | `conjured_item.rb`, plus one line in the gateway |
-| Ragnaros | Add a second legendary item | The gateway only |
-| The Innkeeper | Run the update twice a day | The delivery mechanism only |
+| The Conjurer | Add a new Conjured item type | `conjured_item.rb`, plus one line in the Gateway |
+| Ragnaros | Add a second legendary item | The Gateway only |
+| The Innkeeper | Run the update twice a day | The Delivery Mechanism only |
 
-No row lists two files that belong to two different actors. That is the result you want from use case analysis.
+No row lists two files that belong to two different actors. That is the result you want from Use Case analysis.
 
 ## The rule
 
-For each use case, name the one actor who can ask for a change to it.
+For each Use Case, name the one actor who can ask for a change to it.
 
-- One name: the use case is correct.
-- Two names: split the use case, or accept the tradeoff and record it.
-- No name: the class is not a use case. It is a gateway, a domain object, or dead code.
+- One name: the Use Case is correct.
+- Two names: split the Use Case, or accept the tradeoff and record it.
+- No name: the class is not a Use Case. It is a Gateway, a Domain object, or dead code.
 
-An actor can own many use cases. A use case serves one actor.
+An actor can own many Use Cases. A Use Case serves one actor.
 
 ## The tradeoff
 
 A split has a cost. Sometimes the cost is higher than the fault it removes.
 
-`PauseBrew` and `KeepCoffeeHot` both read the pot sensor. The poll loop runs many times a second, and each run now reads the same sensor twice. Two use cases also need two entries in the [dependency factory](../intermediate/keep-your-wiring-DRY.md).
+`PauseBrew` and `KeepCoffeeHot` both read the pot sensor. The poll loop runs many times a second, and each run now reads the same sensor twice. Two Use Cases also need two entries in the [dependency factory](../intermediate/keep-your-wiring-DRY.md).
 
-Keep two actors in one use case when all three of these are true:
+Keep two actors in one Use Case when all three of these are true:
 
 1. The two actors have never changed a rule on their own. Check the history of the file.
-2. The split repeats a gateway read on a path that runs often.
-3. Neither actor needs the use case as a separate entry point.
+2. The split repeats a Gateway read on a path that runs often.
+3. Neither actor needs the Use Case as a separate entry point.
 
 When you accept the tradeoff, write the decision down next to the code. Name both actors, and name the condition that reverses the decision:
 
@@ -378,11 +378,11 @@ class UpdateForPotPosition
 
 A comment without the reversal condition is a comment that nobody acts on. The condition tells the next reader what to look for.
 
-## From the trenches
+## In practice
 
 The actor fault hides inside a requirement written as one sentence. "The machine makes coffee" and "update the quality each night" both read as one job. Each one holds three or more actors.
 
-Ask one question of every requirement: who asks for this, and who else can change it later. Two answers mean two use cases.
+Ask one question of every requirement: who asks for this, and who else can change it later. Two answers mean two Use Cases.
 
 ## Read next
 

@@ -19,8 +19,8 @@ the right, we value the items on the left more.*
 
 ## Principles
 
-* Code rots and becomes a big ball of mud when programmers fear changing code
-* Applying a sound strategy for preventing the introduction of defects, such as TDD, unpins eliminating fear. [(semantic stability)](https://www.madetech.com/blog/semantically-stable-test-suites) 
-* Refactoring can occur at any time when there is no fear
-* When the team understanding of the domain improves, keeping the in-code model of the domain up to date is important.
-* The SOLID and package principles provide a guide to aid good software design 
+* Code decays into an unstructured mass when programmers fear changing the code
+* A sound strategy for preventing defects, such as TDD, removes that fear. [(semantic stability)](https://www.madetech.com/blog/semantically-stable-test-suites) 
+* A team without that fear refactors at any time
+* When the team understanding of the domain improves, update the model of the domain in the code
+* The SOLID principles and the Package principles guide software design 

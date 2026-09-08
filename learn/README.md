@@ -24,22 +24,22 @@ the right, we value the items on the left more.*
 
 ## Principles
 
-* Code rots and becomes a big ball of mud when programmers fear changing code
-* Applying a sound strategy for preventing the introduction of defects, such as TDD, unpins eliminating fear. [(semantic stability)](https://www.madetech.com/blog/semantically-stable-test-suites) 
-* Refactoring can occur at any time when there is no fear
-* When the team understanding of the domain improves, keeping the in-code model of the domain up to date is important.
-* The SOLID and package principles provide a guide to aid good software design 
+* Code decays into an unstructured mass when programmers fear changing the code
+* A sound strategy for preventing defects, such as TDD, removes that fear. [(semantic stability)](https://www.madetech.com/blog/semantically-stable-test-suites) 
+* A team without that fear refactors at any time
+* When the team understanding of the domain improves, update the model of the domain in the code
+* The SOLID principles and the Package principles guide software design 
 
 ## Learning
 
-A typical number used to determine how much effort is required to become an expert is 10,000 hours of practice.
+People often say that an expert needs 10,000 hours of practice.
 
-It cannot be any practice, however, i.e. you cannot swing a golf club for 10,000 hours and become as good as Tiger Woods.
+Repetition alone does not produce an expert. A golfer who swings a club for 10,000 hours without feedback does not become an expert golfer.
 
-"Practice" must be:
+Practice must be:
 
-* Deliberate and goal directed
-* Include the opportunity for:
+* Deliberate and directed at a goal
+* Open to:
     * Self-reflection
     * Feedback
 
@@ -49,50 +49,50 @@ It cannot be any practice, however, i.e. you cannot swing a golf club for 10,000
 
 ## Core Skills
 
-* Able to describe 
-    - OO language features
-    - the responsibility of each organising component of a clean architecture 
-    - SOLID principles
+* You can describe 
+    - the object-oriented features of your language
+    - the responsibility of each organising component of a Clean Architecture 
+    - the SOLID principles
     
-* Able to identify 
-    - OO language features
-    - the core organising components of a clean architecture in a code base
-    - concrete examples where the forces of the SOLID and Package principles are at play
+* You can identify 
+    - the object-oriented features of your language
+    - the core organising components of a Clean Architecture in a code base
+    - concrete examples where the SOLID principles and the Package principles apply
     
-* Able to implement and use in code
-    - OO language features
-    - all the core organising components of a clean architecture
-    - the SOLID principles as a tool to help guide the shape of your architecture
-    - the Package principles as a tool to help guide the organisation of your packages
+* You can write and use in code
+    - the object-oriented features of your language
+    - all the core organising components of a Clean Architecture
+    - the SOLID principles, as a tool that guides the shape of your architecture
+    - the Package principles, as a tool that guides the organisation of your packages
     
 # Clean Architecture skill-set 
 
-* Able to perform analysis of potential use case(s) 
-    * Determine an order to work through use case(s) that will test the most assumptions
-    * Determine input data structure 
-    * Determine output data structure
-    * Determine which Domain object(s) are potentially required
-    * Determine potential interface of any collaborator(s)
-* Able to perform analysis of appropriate use of asynchronous vs synchronous use cases
-* Able to use type systems to aid construction, refactoring and robustness (rather than primarily a hindrance)
-* Able to make use of IDE refactoring tools to aid refactoring and construction
-* Able to apply TDD to provide the basis of a good testing strategy
-    * Able to apply ATDD to provide extra robustness and a customer-goal-oriented testing approach
-* Able to recognise recurring themes of the development process, and the common challenges faced in each
+* You can analyse a set of Use Cases 
+    * You choose an order of work through the Use Cases that tests the most assumptions
+    * You determine the input data structure 
+    * You determine the output data structure
+    * You determine which Domain objects the Use Cases need
+    * You determine the interface of each collaborator
+* You can decide when to write an asynchronous Use Case and when to write a synchronous one
+* You can use a type system to help you construct, refactor and harden code, instead of fighting the type system
+* You can use the refactoring tools of your IDE to refactor and to write code
+* You can apply TDD as the basis of a good testing strategy
+    * You can apply ATDD to add robustness and to keep the tests directed at the goal of the customer
+* You can recognise the recurring stages of the development process, and the common problems in each stage
     * Null-step (wiring and boilerplate)
     * Degenerate cases
     * Passing the first acceptance test
-    * Creating your second use case
+    * Creating your second Use Case
     * Creating generalisations
     * ...
-* Able to support and mentor others in recurring themes of the development process
-* Be able to (self-)organise/communicate with other teams also writing code in the same parts of the system
+* You can support and mentor others through the recurring stages of the development process
+* You can organise and communicate with the other teams that write code in the same parts of the system
 
 # Object-oriented principles 
 
-Below is a list of OO tools & skills that are non-specific to Clean Architecture. 
+The list below holds object-oriented tools and skills that are not specific to Clean Architecture. 
 
-It is ideal if you have knowledge of how each of these works in your language of choice (assuming it supports the listed language feature).
+Learn how each one works in your language, where your language supports it.
 
 * OO
     * Polymorphism
@@ -112,8 +112,7 @@ It is ideal if you have knowledge of how each of these works in your language of
 
 ### Principles of Object-oriented programming
 
-These are widely accepted as the forces at play when developing OO software. While there is opposition to that, we 
-assume when building Cleanly architected systems, that they hold true.
+The principles below are the widely accepted forces that act on object-oriented software. Some people disagree with them. Made Tech Flavour Clean Architecture assumes that they hold true.
 
 * SOLID principles
     * Single responsibility principle

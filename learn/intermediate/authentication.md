@@ -4,11 +4,11 @@ title: Authentication
 
 # Authentication
 
-Authentication is the act of verifying identity: confirming that the person or system making a request is who they claim to be.
+Authentication verifies identity. Authentication confirms that the person or the system that makes a request is the person or system it claims to be.
 
-In Clean Architecture, authentication fits naturally as a use case backed by a gateway. The delivery mechanism handles the mechanics of extracting credentials from a request; the use case verifies them.
+In Clean Architecture, authentication is a Use Case with a Gateway behind it. The Delivery Mechanism extracts the credentials from the request. The Use Case verifies the credentials.
 
-## Authentication as a use case
+## Authentication as a Use Case
 
 ```ruby
 class AuthenticateUser
@@ -34,13 +34,13 @@ class AuthenticateUser
 end
 ```
 
-`find_by_email` returns a `User` [Domain](../../domain.md) object, not a row — the email address is simply the value used to look it up. The use case asks the user for its `id` and `password_digest`; it never sees a database column.
+`find_by_email` returns a `User` [Domain](../../domain.md) object, not a row. The email address is the value that locates the `User`. The Use Case asks the `User` for its `id` and its `password_digest`. The Use Case never reads a database column.
 
-Note that the use case returns the same error (`:invalid_credentials`) whether the email is unrecognised or the password is wrong. This is deliberate — distinguishing the two would allow an attacker to enumerate valid email addresses.
+WARNING: An error message that separates an unknown email address from a wrong password lets an attacker list the valid email addresses. The Use Case above returns the same error, `:invalid_credentials`, for both.
 
-## Sessions are a gateway concern
+## Sessions are a Gateway concern
 
-A session token is persisted state — it belongs in a gateway:
+A session token is stored state, so a session token belongs in a Gateway:
 
 ```ruby
 class Session
@@ -83,13 +83,13 @@ class SequelSessionGateway
 end
 ```
 
-Both methods deal in `Session` Domain objects. `create` is the one gateway method here that takes an id rather than a Domain object to save, because the token and the expiry are minted by the store rather than by the caller — it is a factory, and it still hands back a `Session`. Anything a use case wants to know about the session it asks the `Session` for.
+Both read methods return a `Session` Domain object. `create` is the one Gateway method here that takes an id instead of a Domain object, because the Gateway generates the token and the expiry, not the caller. `create` is a factory, and `create` still returns a `Session`. A Use Case asks the `Session` for everything else it needs.
 
-A `LogOutUser` use case would call `session_gateway.delete(token:)`. Expiry is enforced by the gateway — use cases do not need to reason about it.
+A `LogOutUser` Use Case calls `session_gateway.delete(token:)`. The Gateway applies the expiry rule, so no Use Case reads the expiry.
 
-## The delivery mechanism handles credential extraction
+## The Delivery Mechanism extracts the credentials
 
-The delivery mechanism is responsible for extracting credentials from the transport layer (headers, cookies, form params) and for rejecting unauthenticated requests before they reach a use case:
+The Delivery Mechanism extracts the credentials from the transport layer, which means the headers, the cookies, or the form parameters. The Delivery Mechanism also rejects an unauthenticated request before that request reaches a Use Case:
 
 ```ruby
 # Sinatra before filter
@@ -106,7 +106,7 @@ end
 
 ### Passing the current user as input
 
-The simplest approach is to pass the actor's identity as a parameter to `execute`:
+The simplest approach passes the identity of the actor as a parameter to `execute`:
 
 ```ruby
 post '/orders' do
@@ -118,13 +118,13 @@ post '/orders' do
 end
 ```
 
-The use case has no knowledge of tokens, headers, or sessions. It receives an ID and treats it as a fact.
+The Use Case knows nothing about tokens, headers or sessions. The Use Case receives an id and treats that id as a fact.
 
-### Providing the current user as a gateway
+### Providing the current user as a dependency
 
-When many use cases in a system need to know who the current user is, threading `current_user_id:` through every `execute` call becomes noisy. An alternative is to provide the current user as a constructor dependency — the same pattern used for gateways.
+When many Use Cases need the identity of the current user, a `current_user_id:` parameter on every `execute` call adds noise. Pass the current user as a constructor dependency instead, in the same way that you pass a Gateway.
 
-Define a simple current user object:
+Write a simple current user object:
 
 ```ruby
 class CurrentUser
@@ -136,7 +136,7 @@ class CurrentUser
 end
 ```
 
-Inject it into use cases that need it:
+Inject the current user into the Use Cases that need it:
 
 ```ruby
 class PlaceOrder
@@ -152,7 +152,7 @@ class PlaceOrder
 end
 ```
 
-The delivery mechanism constructs the `CurrentUser` after authentication and passes it into the [dependency factory](./keep-your-wiring-DRY.md):
+The Delivery Mechanism constructs the `CurrentUser` after authentication, then passes the `CurrentUser` to the [dependency factory](./keep-your-wiring-DRY.md):
 
 ```ruby
 before do
@@ -182,24 +182,24 @@ class Dependencies
 end
 ```
 
-In tests, inject a `CurrentUser` directly — no token, no session, no HTTP:
+In a test, inject a `CurrentUser` directly. The test needs no token, no session and no HTTP:
 
 ```ruby
 let(:current_user) { CurrentUser.new(1) }
 let(:use_case) { PlaceOrder.new(order_gateway: InMemoryOrderGateway.new, current_user: current_user) }
 ```
 
-Both approaches keep the use case free of authentication concerns. Choose whichever keeps the `execute` interface cleaner for your system.
+Both approaches keep authentication out of the Use Case. Choose the approach that gives the simpler `execute` interface in your system.
 
-## What must not live in the use case
+## What must not go in the Use Case
 
-Business use cases should not verify tokens, check session expiry, or read from request headers. That is the delivery mechanism's responsibility.
+A business Use Case does not verify a token, does not check session expiry, and does not read a request header. The Delivery Mechanism does all three.
 
-A use case that begins with `session = @session_gateway.find_by_token(token)` has taken on authentication as a side concern. Token verification is the same regardless of which use case is being called — it belongs in the layer that all requests pass through before reaching any use case.
+A Use Case that starts with `session = @session_gateway.find_by_token(token)` has taken authentication as a second responsibility. Token verification is the same for every Use Case, so token verification belongs in the layer that every request passes through before the request reaches a Use Case.
 
 ## Testing authentication
 
-The `AuthenticateUser` use case can be tested without HTTP or real sessions:
+Test the `AuthenticateUser` Use Case without HTTP and without a real session store:
 
 ```ruby
 describe AuthenticateUser do

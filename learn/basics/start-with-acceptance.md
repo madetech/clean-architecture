@@ -1,16 +1,20 @@
+---
+title: Start with Acceptance Testing
+---
+
 # Start with Acceptance Testing
 
 
-Acceptance testing is where you should start before writing anything. 
-Similarly, if in doubt, always check your acceptance tests and go from there.
+Start with acceptance testing before you write anything else. 
+When you are unsure what to do next, read your acceptance tests and start from there.
 
-Here, we're going to be describing something that looks like the A in [ATDD](https://en.wikipedia.org/wiki/Acceptance_test%E2%80%93driven_development), with [BDD](https://en.wikipedia.org/wiki/Behavior-driven_development) in the mix too.
+This guide describes the A in [ATDD](https://en.wikipedia.org/wiki/Acceptance_test%E2%80%93driven_development), and uses ideas from [BDD](https://en.wikipedia.org/wiki/Behavior-driven_development).
 
 ## What is an acceptance test?
 
-It is a high-level set of tests, written from the perspective of the user, describing steps through the system, and expectations along the way.
+An acceptance test is a high-level test. An acceptance test takes the perspective of the user, describes the steps through the system, and states the expectation at each step.
 
-In BDD the behaviour of the system might be defined light so: 
+BDD describes the behaviour of the system like this: 
 
 ```cucumber
 Given the light is off
@@ -54,29 +58,26 @@ end
 
 ## Write acceptance tests first
 
-The first step before writing any code is to write a failing acceptance test.
+Write a failing acceptance test before you write any other code.
 
-We want to describe what the customer needs before we begin work.
+Describe what the customer needs before you start work.
 
-### Why? 
+### The reasons
 
-We do not want to 
-* get distracted, 
-* lose focus,
-* write more code than necessary, or 
-* run into situations where the moving parts do not work together
+A failing acceptance test stops you from
+* losing focus, 
+* writing more code than the customer needs, and 
+* reaching a state where the separate parts of the system do not work together
 
-**More than anything, we want to understand what we're trying to achieve.**
+**Above all, an acceptance test states the goal before you start.**
 
 ### What should an acceptance test suite test?
 
-Tests have three components: **Arrange**-**Act**-**Assert**, lets look at what should be exercised in each step.
-
-Let's examine each in reverse order
+A test has three parts: **Arrange**, **Act** and **Assert**. The sections below describe each part, in reverse order.
 
 #### Assert
 
-**Ideally:** Execute a use case and ensure the result it responds with is expected.
+Run a Use Case, then check the response of that Use Case.
 
 ```ruby
 it 'is off' do
@@ -88,24 +89,24 @@ end
 
 ```
 
-However, if your application is not fully built yet a small shortcut might be to go to a gateway directly to achieve your assertion. This allows you to take small slices through your work. 
+Your application may not be complete yet. As a shortcut, assert against a Gateway directly. The shortcut lets you take a small slice of the work at a time.
 
-Tightly coupling to gateways is not ideal:
+WARNING: An acceptance test coupled to a Gateway has three costs:
 
-* Makes it harder to refactor the interface between use cases and gateways
-* Causes acceptance tests to be privvy to the interals of your application i.e. Domain objects
-* Your acceptance tests will need to be changed (code churn) more often due to this
+* The interface between Use Cases and Gateways becomes harder to refactor.
+* The acceptance test sees the internals of your application, which are the Domain objects.
+* The acceptance test changes more often.
 
-##### From the trenches
+##### In practice
 
-More than one use case may be aware of a particular Domain object. In situations where this is more than a couple, it is common to extract factories or builders to create Domain objects for you (reused in both test and production code). 
+More than one Use Case can know about the same Domain object. When several Use Cases know about the same Domain object, extract a factory or a builder that constructs the Domain object. Both the tests and the production code then call that factory. 
 
-Changing/refactoring the API of a Domain object may require no changes to any acceptance tests if your acceptance specs never see them. Indeed, it is often possible to change one aspect of unit test code to achieve the same end if there are appropriate abstractions in place.  
+An acceptance test that never sees a Domain object needs no change when you refactor the API of that Domain object. With the right abstractions in place, one change to the unit test code is often enough.  
 
 
 #### Act
 
-The code you exercise in the Act step of an acceptance test is always going to be a use case's boundary.
+The Act step of an acceptance test always calls the boundary of a Use Case.
 
 ```ruby
 context 'when I turn the light on' do
@@ -114,39 +115,40 @@ end
 ```
 
 
-##### From the trenches
-Beware of specifying the needs of your customer in API tests (e.g. Rails feature-spec). 
+##### In practice
 
-Let me explain how the Single Responsibility Principle manifests itself in Acceptance Testing.
+WARNING: Do not specify the needs of your customer in an API test, such as a Rails feature spec. 
 
-Tightly coupling descriptions of what your customer needs to your HTTP-stack can cause code churn on your acceptance tests for technical reasons, not domain reasons. For example, a cookie might need to be set, or a new version of HTTP/Ajax/JS requires some _sort of widget to be reticulated_.
+The single responsibility principle applies to acceptance tests as well as to production code.
 
-It is hard to concentrate on two problems at once. If you are changing a test suite because some _spline needs reticulating in your HTTP SPDY Headers_, are you going to be focussing on the fine points of your customer's domain? 
+An acceptance test coupled to your HTTP stack changes for technical reasons, not for domain reasons. For example, the test changes when the system sets a new cookie, or when a new version of a JavaScript library changes the request.
 
-Could you potentially introduce a hole in your test suite inadvertently? In any moderate-to-complex system that risk is higher than you probably expect.
+It is hard to concentrate on two problems at once. A developer who changes a test because of an HTTP header does not concentrate on the domain of the customer at the same time. 
 
-Acceptance Tests specify the needs of the customer, nothing more or less. 
+That developer can leave a gap in the test suite without noticing. In a system of moderate complexity, that risk is high.
 
-Separate the concerns both in Production Code and, most importantly, your Test Code.
+An acceptance test specifies the needs of the customer, and nothing else. 
+
+Separate the concerns in your production code. Separate the concerns in your test code as well.
 
 #### Arrange
 
-Setting up your Acceptance Tests is one of the most difficult of the testing arts to become adept in. 
+The Arrange step is the hardest part of acceptance testing to learn. 
 
-In the simplest case, your "Arrange" step is merely a case of calling one or more use cases to get the system to the state you need. This is an example of the ideal world, this is what system designers should aim for.
+In the simplest case the Arrange step calls one or more Use Cases to put the system into the state you need. Aim for that.
 
-That said, while this is the ideal it may not be practical or possible.
+That is not always possible.
 
-Aim to have your test setup code mimic how you'd expect your application to be used by it's delivery mechanism.
+Write your test setup so that it calls the system the same way the Delivery Mechanism calls the system.
 
-## Should we use Code or a Domain Specific Language?
+## Code or a Domain Specific Language?
 
-Gherkin (Cucumber/SpecFlow) and Fitnesse are common DSL choices for writing executable acceptance tests.
+Gherkin (Cucumber and SpecFlow) and Fitnesse are common DSL choices for executable acceptance tests.
 
-If you are involving your (non-programmer) stakeholders in creation and verification of acceptance tests, you should probably use a DSL. If you are not doing this, use code, but try to still use human-readable language. 
+Use a DSL when stakeholders who do not program write or check the acceptance tests. Use code otherwise, and keep the code readable. 
 
 ```Gherkin
-Feature: An customer places an order
+Feature: A customer places an order
 
 Scenario: An existing customer places an order
 Given an existing customer

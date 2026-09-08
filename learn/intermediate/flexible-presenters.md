@@ -4,13 +4,13 @@ title: Presenters are more flexible
 
 # Presenters are more flexible
 
-Returning a hash from a use case is the right default. It is simple, easy to test, and works well for most situations.
+A Use Case that returns a hash is the correct default. A hash is simple, easy to test, and correct for most situations.
 
-But as a system grows, use cases accumulate more outcomes. Each new outcome requires every caller to branch on the result hash. Left unchecked, the same `if` statement ends up duplicated across the codebase — and this is a symptom of zero polymorphism.
+As a system grows, a Use Case collects more outcomes. Each new outcome forces every caller to branch on the result hash. The same `if` statement then appears across the code base. That duplication is a symptom of zero polymorphism.
 
 ## The zero polymorphism problem
 
-Consider a use case that can fail in multiple ways:
+Consider a Use Case that fails in several ways:
 
 ```ruby
 class PlaceOrder
@@ -50,13 +50,13 @@ when :out_of_stock   then json({ error: 'out_of_stock' }, status: 422)
 end
 ```
 
-The same four-way branch appears in every delivery mechanism. Add a fifth outcome to the use case and every caller must be updated. This is the definition of zero polymorphism: variation handled by repeated conditionals rather than by different objects.
+The same four-way branch appears in every Delivery Mechanism. Add a fifth outcome to the Use Case, and you must change every caller. That is zero polymorphism: repeated conditionals carry the variation instead of separate objects.
 
-In the worst case the same `if` appears in all three layers — the gateway inspecting a type to build the right data structure, the use case inspecting it again to apply the right rule, the delivery mechanism inspecting it a third time to render the right response. The [extend-with-domain](./extend-with-domain.md) guide covers eliminating the gateway and use case branches through polymorphic domain objects. The presenter pattern eliminates the delivery mechanism branch.
+The same `if` can appear in all three layers. The Gateway reads a type to build the right data structure. The Use Case reads the type again to apply the right rule. The Delivery Mechanism reads the type a third time to render the right response. The [extend-with-domain](./extend-with-domain.md) guide removes the branch in the Gateway and the branch in the Use Case with polymorphic Domain objects. The presenter pattern removes the branch in the Delivery Mechanism.
 
 ## The presenter pattern
 
-Instead of returning a hash, the use case accepts a presenter and calls a named method per outcome:
+The Use Case accepts a presenter instead of returning a hash, and calls one named method for each outcome:
 
 ```ruby
 class PlaceOrder
@@ -78,11 +78,11 @@ class PlaceOrder
 end
 ```
 
-Each caller provides its own implementation of the outcome methods. The branching disappears — replaced by polymorphism.
+Each caller writes its own version of the outcome methods. The branch disappears, and polymorphism takes its place.
 
 ## Self-shunting: the controller as the presenter
 
-The simplest way to provide a presenter is to make the controller the presenter itself. The controller passes `self` to the use case and implements the outcome methods directly:
+The simplest presenter is the controller itself. The controller passes `self` to the Use Case, and writes the outcome methods directly:
 
 ```ruby
 class OrdersController < ApplicationController
@@ -112,9 +112,9 @@ class OrdersController < ApplicationController
 end
 ```
 
-This is called self-shunting. There is no indirection — the controller is the presenter. Each outcome is a named method, not a branch in `create`. Adding a new outcome means adding a new method, not modifying an existing one.
+This pattern is called self-shunting. There is no extra object, because the controller is the presenter. Each outcome is a named method, not a branch inside `create`. A new outcome means a new method, not a change to an existing method.
 
-The JSON API controller handles the same outcomes differently, with no shared code needed:
+The JSON API controller renders the same outcomes differently, and shares no code with the HTML controller:
 
 ```ruby
 class Api::OrdersController < ApplicationController
@@ -146,13 +146,13 @@ end
 
 ## A worked example: polymorphism at every layer
 
-The sections above address the delivery mechanism layer in isolation. This example shows the full chain: the same polymorphism that eliminates branching in the gateway and use case (covered in [extend-with-domain](./extend-with-domain.md)) extends through to the delivery mechanism.
+The sections above cover the Delivery Mechanism layer on its own. This example covers the full chain. The polymorphism that removes the branch in the Gateway and in the Use Case, which [extend-with-domain](./extend-with-domain.md) describes, reaches the Delivery Mechanism as well.
 
-The scenario: viewing an order that can be in one of three states — pending, confirmed, or dispatched. Each state carries different data and should render differently.
+The example views an order in one of three states: pending, confirmed, or dispatched. Each state carries different data, and each state renders differently.
 
-### The domain objects
+### The Domain objects
 
-Each state is a separate class, exposing only the data relevant to that state. Domain objects have no knowledge of presenters — they are pure domain concepts:
+Each state is a separate class that exposes only the data of that state. A Domain object knows nothing about a presenter:
 
 ```ruby
 class PendingOrder
@@ -185,11 +185,11 @@ class DispatchedOrder
 end
 ```
 
-`DispatchedOrder` exposes a `tracking_number`; `PendingOrder` does not. Each type surfaces only the data it actually has.
+`DispatchedOrder` exposes a `tracking_number`. `PendingOrder` does not. Each type exposes only the data that the type holds.
 
-### The gateway and builder
+### The Gateway and builder
 
-The gateway reads the `status` column and delegates construction to a builder (see [extend-with-domain](./extend-with-domain.md) for the full rationale). Constructor lambdas handle the differing parameters each type requires:
+The Gateway reads the `status` column and calls a builder to construct the Domain object. [extend-with-domain](./extend-with-domain.md) gives the full reason. A constructor lambda passes the parameters that each type needs:
 
 ```ruby
 class OrderBuilder
@@ -215,15 +215,15 @@ class SequelOrderGateway
 end
 ```
 
-No branching in the gateway. Adding a new state means a new domain class and one new entry in `CONSTRUCTORS`.
+The Gateway holds no branch. A new state means a new Domain class and one new entry in `CONSTRUCTORS`.
 
-### The use case: two approaches
+### The Use Case: three approaches
 
-There are two ways to dispatch from domain object to presenter. Each makes a different trade-off.
+There are three ways to send a Domain object to a presenter. Each way makes a different trade-off.
 
-#### Option A: delegate to the domain object
+#### Option A: delegate to the Domain object
 
-Each domain object implements a `present_to` method that calls the appropriate presenter method with its own data:
+Each Domain object gets a `present_to` method that calls the right presenter method with its own data:
 
 ```ruby
 class PendingOrder
@@ -248,7 +248,7 @@ class DispatchedOrder
 end
 ```
 
-The use case simply delegates:
+The Use Case delegates:
 
 ```ruby
 def execute(order_id:, presenter:)
@@ -258,13 +258,13 @@ def execute(order_id:, presenter:)
 end
 ```
 
-**Pros:** Truly open/closed — adding a new state requires only a new class that implements `present_to`. The use case never changes. The dispatch is fully polymorphic with no lookup table to maintain.
+**Pros:** Open for extension and closed for modification. A new state needs only a new class with a `present_to` method. The Use Case never changes. The dispatch is fully polymorphic, and there is no lookup table to maintain.
 
-**Cons:** The domain object becomes aware of a use-case-specific presenter interface. If `PendingOrder` is used across multiple use cases with different presenter interfaces, it must either implement multiple `present_to_*` methods or pick one to favour. Presenter method names leak into the domain's vocabulary.
+**Cons:** The Domain object learns a presenter interface that belongs to one Use Case. When several Use Cases with different presenter interfaces read `PendingOrder`, `PendingOrder` must either write one `present_to_*` method per interface, or choose one interface. Presenter method names enter the vocabulary of the domain.
 
-#### Option B: lookup hash in the use case
+#### Option B: lookup hash in the Use Case
 
-The domain objects remain pure data. The use case owns a `PRESENT` dispatch table keyed on the domain class:
+The Domain objects stay as data. The Use Case owns a `PRESENT` table keyed on the Domain class:
 
 ```ruby
 class ViewOrder
@@ -286,13 +286,13 @@ class ViewOrder
 end
 ```
 
-**Pros:** Domain objects are free of any presenter knowledge — they are pure domain concepts. Each use case defines its own dispatch table independently, so the same domain objects can be used in contexts with entirely different presenter interfaces.
+**Pros:** The Domain objects know nothing about any presenter. Each Use Case owns its own table, so the same Domain objects serve Use Cases with completely different presenter interfaces.
 
-**Cons:** The use case must be updated when a new domain class is added — it is not fully open/closed. Keying on `order.class` is also fragile: renaming a class silently breaks the lookup, and subclasses will not be found unless explicitly added. The use case implicitly knows about every concrete type in the hierarchy.
+**Cons:** A new Domain class forces a change to the Use Case, so the Use Case is not closed for modification. A key of `order.class` is fragile: a class rename breaks the lookup with no error at the point of the rename, and a subclass is not found unless you add it. The Use Case knows every concrete type in the hierarchy.
 
 #### Option C: strategy objects injected at build time
 
-A strategy object per domain type is responsible for calling the right presenter methods. The builder injects the appropriate strategy into each domain object at construction time. The domain object delegates `present_to` to its strategy — knowing it has one, but not what it does:
+One strategy object per Domain type calls the right presenter methods. The builder injects the strategy into the Domain object at construction. The Domain object delegates `present_to` to the strategy, and knows only that it holds a strategy:
 
 ```ruby
 class PendingOrderPresentationStrategy
@@ -314,7 +314,7 @@ class DispatchedOrderPresentationStrategy
 end
 ```
 
-The domain objects hold a reference to the injected strategy:
+Each Domain object holds the injected strategy:
 
 ```ruby
 class PendingOrder
@@ -332,7 +332,7 @@ class PendingOrder
 end
 ```
 
-The builder wires the right strategy into each constructor lambda:
+The builder passes the right strategy into each constructor lambda:
 
 ```ruby
 class OrderBuilder
@@ -349,7 +349,7 @@ class OrderBuilder
 end
 ```
 
-The use case is identical to Option A — it just calls `present_to`:
+The Use Case is the same as in Option A. The Use Case calls `present_to`:
 
 ```ruby
 def execute(order_id:, presenter:)
@@ -359,15 +359,15 @@ def execute(order_id:, presenter:)
 end
 ```
 
-**Pros:** The use case is open/closed — it never changes when new types are added. Domain objects do not know about specific presenter interfaces, only that they hold a strategy. Different use cases can inject different strategies for the same domain type, giving full flexibility without coupling. No fragile `.class` lookup.
+**Pros:** The Use Case is closed for modification, and never changes when you add a type. A Domain object knows no presenter interface, and knows only that it holds a strategy. Different Use Cases inject different strategies for the same Domain type, which gives full flexibility with no coupling. There is no `.class` lookup.
 
-**Cons:** More moving parts — a strategy class per type, strategy injection in the builder, and a `present_to` delegation method on every domain object. The indirection can be harder to follow.
+**Cons:** More parts: one strategy class per type, strategy injection in the builder, and a `present_to` method on every Domain object. The extra indirection is harder to follow.
 
-**When it is worth the complexity:** Strategy injection earns its place when the aggregate root domain objects are complex hierarchies — for example, an `Order` composed of `LineItem` objects that are themselves polymorphic (`PhysicalItem`, `DigitalItem`, `SubscriptionItem`), each with their own display nuances. A strategy can traverse and present this whole object graph with full knowledge of the hierarchy, while the domain objects and the use case remain oblivious to the presentation logic entirely. For simple flat domain objects, Options A or B are sufficient.
+**When the extra parts are worth it:** Strategy injection is worth it when the aggregate root Domain objects form a deep hierarchy. For example, an `Order` holds `LineItem` objects, and each `LineItem` is itself polymorphic as `PhysicalItem`, `DigitalItem` or `SubscriptionItem`, and each one renders differently. One strategy walks that whole object graph and presents it, and the Domain objects and the Use Case hold no presentation code. For a flat Domain object, Option A or Option B is enough.
 
-### The delivery mechanism
+### The Delivery Mechanism
 
-The controller self-shunts as the presenter. Each outcome is a named method — the `show` action itself contains no conditionals:
+The controller self-shunts as the presenter. Each outcome is a named method, and the `show` action holds no conditional:
 
 ```ruby
 class OrdersController < ApplicationController
@@ -393,11 +393,11 @@ class OrdersController < ApplicationController
 end
 ```
 
-Adding a fourth state — say `CancelledOrder` — requires: a new domain class, one line in `OrderBuilder::CONSTRUCTORS`, and one new method on the controller. The gateway, the use case, the `show` action, and all other controller methods are untouched.
+A fourth state, such as `CancelledOrder`, needs a new Domain class, one line in `OrderBuilder::CONSTRUCTORS`, and one new method on the controller. The Gateway, the Use Case, the `show` action and the other controller methods need no change.
 
 ## Separate presenter objects
 
-When the presentation logic itself is complex or needs to be shared across controllers, extract it into a dedicated presenter object rather than shunting into the controller:
+When the presentation code is complex, or when several controllers share it, write a separate presenter object instead of self-shunting:
 
 ```ruby
 class PlaceOrderPresenter
@@ -423,7 +423,7 @@ class PlaceOrderPresenter
 end
 ```
 
-The controller instantiates and interrogates the presenter:
+The controller constructs the presenter, then reads the presenter:
 
 ```ruby
 def create
@@ -436,7 +436,7 @@ end
 
 ## Testing with the presenter
 
-In tests, use a double to assert which outcome was called:
+In a test, use a double to check which outcome the Use Case called:
 
 ```ruby
 describe PlaceOrder do
@@ -477,10 +477,10 @@ end
 
 ## When to use a presenter
 
-The hash return is simpler — prefer it unless you have a concrete reason to reach for a presenter. Good reasons include:
+A hash return is simpler. Use a hash unless you have one of these reasons for a presenter:
 
-- The use case has several distinct outcome paths and the same branching is appearing in multiple callers
-- Multiple callers handle outcomes in fundamentally different ways
-- You want the compiler (in typed languages) to enforce that callers handle every outcome
+- The Use Case has several distinct outcomes, and the same branch appears in more than one caller
+- Two or more callers render the outcomes in completely different ways
+- You want the compiler, in a typed language, to require every caller to cover every outcome
 
-A use case that returns `{ success: true }` or `{ success: false, errors: [...] }` does not need a presenter. A use case with four distinct outcomes handled differently across two delivery mechanisms probably does.
+A Use Case that returns `{ success: true }` or `{ success: false, errors: [...] }` does not need a presenter. A Use Case with four distinct outcomes, rendered differently by two Delivery Mechanisms, does.

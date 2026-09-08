@@ -4,9 +4,9 @@ title: Keep your wiring DRY
 
 # Keep your wiring DRY
 
-Once you have a handful of use cases and real gateways, you will notice a pattern: every delivery mechanism constructs the same dependencies over and over.
+Once you have several Use Cases and several real Gateways, a pattern appears: every Delivery Mechanism constructs the same dependencies again and again.
 
-## The smell
+## The problem
 
 ```ruby
 post '/orders' do
@@ -29,13 +29,13 @@ delete '/orders/:id' do
 end
 ```
 
-Every route knows about `SequelOrderGateway`, `DB`, `EmailNotifier`, and how to construct them. Change a constructor argument and you touch every route. Add a new dependency to `PlaceOrder` and you have to find every place it is constructed.
+Every route knows about `SequelOrderGateway`, `DB` and `EmailNotifier`, and knows how to construct all three. Change one constructor argument, and you change every route. Add a dependency to `PlaceOrder`, and you must find every place that constructs `PlaceOrder`.
 
-This is fragility — and it violates the Dependency Inversion Principle. Delivery mechanisms should not know about gateway implementations.
+This is fragility, and it breaks the dependency inversion principle. A Delivery Mechanism must not know about a Gateway implementation.
 
 ## A dependency factory
 
-Extract all construction into one place:
+Move all construction into one class:
 
 ```ruby
 class Dependencies
@@ -66,7 +66,7 @@ class Dependencies
 end
 ```
 
-Delivery mechanisms become unaware of gateways entirely:
+Each Delivery Mechanism then knows nothing about any Gateway:
 
 ```ruby
 post '/orders' do
@@ -82,11 +82,11 @@ delete '/orders/:id' do
 end
 ```
 
-This is the pattern already visible in the [acceptance tests](../basics/start-with-acceptance.md): `system.get_use_case(:create_light)`. The dependency factory is what makes that work.
+The [acceptance tests](../basics/start-with-acceptance.md) already show this pattern: `system.get_use_case(:create_light)`. The dependency factory is the class that provides `get_use_case`.
 
 ## The composition root
 
-The place where you construct the factory and wire everything together is called the composition root. In a Sinatra app this is typically the application file, before any routes are defined:
+The composition root is the place where you construct the factory and wire everything together. In a Sinatra application the composition root is the application file, above the routes:
 
 ```ruby
 def dependencies
@@ -94,11 +94,11 @@ def dependencies
 end
 ```
 
-There is exactly one place in your codebase that knows about `SequelOrderGateway` and `DB`. Everything else is shielded from that knowledge.
+Exactly one place in your code base knows about `SequelOrderGateway` and `DB`. Nothing else holds that knowledge.
 
 ## Swapping implementations for tests
 
-Because all construction lives in the factory, you can create a test variant that injects fakes instead of real gateways — without changing any delivery mechanism code:
+All construction is in the factory, so you write a test factory that injects Fakes in place of the real Gateways. No Delivery Mechanism changes:
 
 ```ruby
 class TestDependencies
@@ -113,4 +113,4 @@ class TestDependencies
 end
 ```
 
-Your acceptance tests use `TestDependencies`. Your production app uses `Dependencies`. The use cases and delivery mechanisms never change.
+Your acceptance tests use `TestDependencies`. Your Production application uses `Dependencies`. The Use Cases and the Delivery Mechanisms need no change.

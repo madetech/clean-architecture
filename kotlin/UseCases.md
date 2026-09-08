@@ -1,21 +1,21 @@
 ---
-title: Clean Architecture: Kotlin Use Cases
+title: "Clean Architecture: Kotlin Use Cases"
 ---
 
 # Use Cases
 
-Use Cases can be both asynchronous and synchronous.
+A Use Case is synchronous or asynchronous.
 
-The primary difference is that a synchronous Use Case will return it's result, and an asynchronous Use Case will call a callback with it's result.
+A synchronous Use Case returns its result. An asynchronous Use Case passes its result to a callback.
 
-It is possible to generalise the boundary interfaces of these two types of Use Cases.
+You can generalise the boundary interface of each of the two types.
 
 ## Asynchronous Example
 
-Asynchronous use cases provide greater control over rendering to the UI. However they add complexities to testing.
+An asynchronous Use Case gives you more control over rendering to the UI. An asynchronous Use Case is harder to test.
 
-An [example generalisation can be found here](https://github.com/madetech/dojos/blob/master/mld-klean-architecture/src/main/kotlin/com/madetech/clean/usecase/AsynchronousUseCase.kt), 
-with [a derivative here](https://github.com/madetech/dojos/blob/master/mld-klean-architecture/src/main/kotlin/io/continuousfeedback/core/usecase/CreateTeamMember.kt) for a specific use case.
+Read an [example generalisation here](https://github.com/madetech/dojos/blob/master/mld-klean-architecture/src/main/kotlin/com/madetech/clean/usecase/AsynchronousUseCase.kt), 
+and [a derivative here](https://github.com/madetech/dojos/blob/master/mld-klean-architecture/src/main/kotlin/io/continuousfeedback/core/usecase/CreateTeamMember.kt) for one specific Use Case.
 
 ```kotlin
 package com.acmeindustries.widget.usecase
@@ -34,7 +34,7 @@ interface ViewWidgets {
 
 ## Synchronous Example
 
-Synchronous Use Cases provide a simpler interface for testing, but can make representing failure paths and control over the UI harder to maintain.
+A synchronous Use Case gives you a simpler interface to test. A synchronous Use Case makes failure paths and UI control harder to maintain.
 
 ```kotlin
 package com.acmeindustries.widget.usecase
@@ -57,8 +57,8 @@ import com.acmeindustries.widget.domain.Widget
 class WidgetPerFooBarReport(val widgetGateway: WidgetGateway) : ViewWidgetPerFooBarReport {
     fun execute(request: Request): Response {
         val widgets = widgetGateway.all()
-        //secret sauce here
-        return Response(...) //return response populated with data
+        //the report rules go here
+        return Response(...) //return the response with the data
     }
 }
 

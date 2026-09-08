@@ -6,25 +6,23 @@ title: Clean Architecture & ATDD
 
 ## Acceptance Testing
 
-The purpose of acceptance testing is to test an entire system via it's boundary only.
-It serves as a *stand-in*, and documentation for the implementation of the future UI of your system.
-Anything that you are coupled to in your acceptance tests, you are also going to be coupled to in your UI.
+An acceptance test exercises the whole system through the boundary of the system, and through nothing else.
 
-This means an acceptance test, cannot depend on the following types of objects:
+An acceptance test stands in for the future UI of your system, and documents what that UI must do. Whatever an acceptance test couples to, the UI couples to as well.
+
+An acceptance test therefore must not depend on these types of object:
 
 - Domain objects 
 - Gateways 
 
-It must only depend on the *Boundary* of your system.
+An acceptance test depends on the *Boundary* of your system only.
 
-**The purpose of acceptance tests** is to measure success towards the goal of meeting the customer's needs, and reduces the 
-occurrence of gold plating
+**An acceptance test measures progress towards the needs of the customer.** An acceptance test also reduces the amount of work that the customer did not ask for.
 
 ## Unit Testing
 
-Unit Tests are able to break these rules of acceptance tests. 
-It is meant to serve as documentation of the behaviour of lower level components.
-Since these tests are lower level it is possible to test-drive the system into performing every possible permutation of behaviour under a test situation.
+A unit test can break the rules above. A unit test documents the behaviour of a lower level component.
 
-This gives the property of [(semantic stability)](https://www.madetech.com/blog/semantically-stable-test-suites) .
+A unit test drives one component at a time, so a unit test can force the system through every permutation of that behaviour.
 
+A suite of unit tests that does this gives you [semantic stability](https://www.madetech.com/blog/semantically-stable-test-suites).

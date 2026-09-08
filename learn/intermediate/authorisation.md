@@ -6,11 +6,11 @@ title: Authorisation
 
 [Authentication](./authentication.md) answers "who are you?". Authorisation answers "what are you allowed to do?".
 
-They are distinct concerns and should live in distinct places.
+The two are separate concerns, and each belongs in a separate place.
 
-## The problem with authorisation inside use cases
+## The problem with authorisation inside Use Cases
 
-It is tempting to check permissions inside the use case itself:
+It is tempting to check the permission inside the Use Case:
 
 ```ruby
 class CancelOrder
@@ -24,11 +24,11 @@ class CancelOrder
 end
 ```
 
-This works, but it mixes two concerns: "is this user allowed to cancel this order?" and "cancel the order". As authorisation rules grow — roles, team membership, time-based windows — the use case fills up with logic that has nothing to do with cancellation. Testing the cancellation logic also requires setting up authorisation scenarios.
+That code works, and that code mixes two concerns: "may this user cancel this order?" and "cancel the order". As the authorisation rules grow to cover roles, team membership and time windows, the Use Case fills with logic that has nothing to do with cancellation. A test of the cancellation logic then also needs an authorisation setup.
 
 ## The proxy pattern
 
-A cleaner approach is a proxy class that wraps the use case call. The proxy is solely responsible for authorisation. If the check passes, it delegates to the real use case. If not, it returns early. The real use case remains pure business logic.
+Write a proxy class that wraps the call to the Use Case. The proxy performs the authorisation and nothing else. When the check passes, the proxy calls the real Use Case. When the check fails, the proxy returns early. The real Use Case holds business logic only.
 
 ```ruby
 # The real use case — knows nothing about who is allowed to call it
@@ -46,7 +46,7 @@ class CancelOrder
 end
 ```
 
-The gateway returns an `Order` [Domain](../../domain.md) object and accepts one back to save — there is no `cancel(order_id)` method on the gateway. Cancelling is something an order knows how to do; persisting the result is all the gateway is for.
+The Gateway returns an `Order` [Domain](../../domain.md) object, and accepts an `Order` back to save. The Gateway has no `cancel(order_id)` method. An order knows how to cancel itself. The Gateway saves the result.
 
 ```ruby
 # The proxy — responsible only for authorisation
@@ -67,17 +67,17 @@ class AuthorisedCancelOrder
 end
 ```
 
-Note that the proxy returns `:not_authorised` whether the order does not exist or the actor lacks permission. This is intentional — returning `:not_found` for a missing resource leaks information about what exists in the system.
+WARNING: A `:not_found` error for a missing record tells the caller which records exist in the system. The proxy above returns `:not_authorised` both when the order does not exist and when the actor has no permission.
 
-The proxy has the same interface as the use case it wraps: it responds to `execute`. From the delivery mechanism's perspective, they are interchangeable.
+The proxy exposes the same interface as the Use Case it wraps: the proxy responds to `execute`. The Delivery Mechanism cannot tell the two apart.
 
 ## Policy objects
 
-Policy objects hold the authorisation rules. They are only ever evaluated by proxy classes — not by use cases, not by delivery mechanisms.
+A policy object holds the authorisation rules. Only a proxy class evaluates a policy object. A Use Case does not. A Delivery Mechanism does not.
 
-Because the gateway returns an `Order` Domain object, the policy is written against the domain rather than against database columns.
+The Gateway returns an `Order` Domain object, so the policy reads the domain instead of a database column.
 
-The policy receives the data it needs to make a decision and the `CurrentUser` that provides actor context (introduced in [Authentication](./authentication.md)):
+The policy receives the data it needs for the decision, and the `CurrentUser` that gives the actor context. [Authentication](./authentication.md) introduces `CurrentUser`.
 
 ```ruby
 class OrderPolicy
@@ -108,11 +108,11 @@ class OrderPolicy
 end
 ```
 
-Policy objects are plain Ruby with no dependencies — they are among the easiest things in the system to test.
+A policy object is plain Ruby with no dependencies, so a policy object is one of the easiest parts of the system to test.
 
 ## Wiring via the dependency factory
 
-The [dependency factory](./keep-your-wiring-DRY.md) composes the proxy around the use case transparently. The delivery mechanism requests `:cancel_order` and receives whatever is registered — proxy included:
+The [dependency factory](./keep-your-wiring-DRY.md) composes the proxy around the Use Case. The Delivery Mechanism asks for `:cancel_order` and receives whatever the factory registers, which includes the proxy:
 
 ```ruby
 class Dependencies
@@ -134,7 +134,7 @@ class Dependencies
 end
 ```
 
-The delivery mechanism is completely unaware that a proxy exists:
+The Delivery Mechanism does not know that a proxy exists:
 
 ```ruby
 delete '/orders/:id' do
@@ -145,7 +145,7 @@ end
 
 ## Testing each layer independently
 
-Test the policy in isolation — no gateways, no use cases:
+Test the policy on its own, with no Gateway and no Use Case:
 
 ```ruby
 describe OrderPolicy do
@@ -177,7 +177,7 @@ describe OrderPolicy do
 end
 ```
 
-Test the use case with no authorisation concerns at all:
+Test the Use Case with no authorisation setup at all:
 
 ```ruby
 describe CancelOrder do
@@ -192,7 +192,7 @@ describe CancelOrder do
 end
 ```
 
-Test the proxy with a stub inner use case to verify it enforces the policy and delegates correctly:
+Test the proxy with a stub inner Use Case. The test checks that the proxy applies the policy and calls the inner Use Case:
 
 ```ruby
 describe AuthorisedCancelOrder do
@@ -227,22 +227,22 @@ describe AuthorisedCancelOrder do
 end
 ```
 
-## What must not live in the delivery mechanism
+## What must not go in the Delivery Mechanism
 
-It is tempting to enforce authorisation in a `before` filter:
+It is tempting to apply authorisation in a `before` filter:
 
 ```ruby
-# Avoid this
+# Wrong
 before '/orders/:id/cancel' do
   order = order_gateway.find_by_id(params[:id].to_i)
   halt 403 unless order.customer_id == @current_user_id
 end
 ```
 
-The rule is now tied to an HTTP route. If the same action is triggered by a background job, a CLI command, or another use case, the protection is absent. Authorisation in the delivery mechanism is only authorisation for that one delivery mechanism.
+WARNING: That rule is now tied to one HTTP route. A background job, a CLI command or another Use Case triggers the same action with no protection. Authorisation in a Delivery Mechanism protects that one Delivery Mechanism only.
 
-The proxy pattern ensures the protection travels with the use case, regardless of how it is invoked.
+The proxy pattern keeps the protection with the Use Case, whichever caller starts it.
 
-## From the trenches
+## In practice
 
-As authorisation rules grow complex — roles, team membership, time-based windows — additional policy methods and proxy classes absorb that complexity cleanly. A use case that has grown twenty lines of permission checks before doing any real work is a signal the proxy is missing.
+Authorisation rules grow to cover roles, team membership and time windows. Extra policy methods and extra proxy classes absorb that growth. A Use Case with twenty lines of permission checks before the first line of real work tells you that the proxy is missing.

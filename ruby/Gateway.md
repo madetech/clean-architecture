@@ -1,8 +1,9 @@
 ---
-title: Clean Architecture Ruby: Gateway
+title: "Clean Architecture Ruby: Gateway"
 ---
 
 # Gateway
 
-Contains IO adapters (e.g. files, database or API calls)
-These construct Domain objects for use by Use Cases, and, save Domain objects given to it
+The `gateway/` directory holds the IO adapters, such as adapters for files, a database, or API calls.
+
+A Gateway constructs Domain objects for a Use Case to read. A Gateway also accepts a Domain object and saves it.

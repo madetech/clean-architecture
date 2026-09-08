@@ -1,22 +1,21 @@
 ---
-title: Clean Architecture Ruby: RSpec
+title: "Clean Architecture Ruby: RSpec"
 ---
 
 # RSpec ATDD Structure
 
 ## spec/acceptance
 
-Contains end-to-end acceptance specs, without the Web Delivery mechanism
-These specs call the interface that the Web Delivery mechanism uses
+Holds the end-to-end acceptance specs. These specs exclude the web Delivery Mechanism, and call the interface that the web Delivery Mechanism calls.
 
 ## spec/unit
 
-Contains unit specs
+Holds the unit specs.
 
 ## spec/fixtures
 
-Contains raw fixtures
+Holds the raw fixtures.
 
 ## spec/test_doubles
 
-Contains "complex" test doubles
+Holds the test doubles that need more than one line to build.

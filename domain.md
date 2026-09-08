@@ -1,17 +1,16 @@
-# Domain 
+# Domain
 
-The purpose of Domain objects are to model the domain in a "data storage agnostic way".
-The key here that there is an impedance-mismatch between Data Structures and Objects.
- 
-Since databases store Data Structures, not Objects with behaviour, we should rely on Gateways to do this conversion for us.
+A Domain object models the domain in a way that does not depend on data storage.
 
-The challenge is determining what behaviours lie within Domain objects, and what behaviours lie within Use Cases.
+A database stores data structures. An object-oriented language holds objects with behaviour. The two forms do not match, and that mismatch is the impedance mismatch. A [Gateway](gateway.md) converts between the two forms.
 
-A good rule of thumb is that behaviours within Domain objects *must be valid for all Use Cases across the system.*
+The hard question is which behaviour belongs in a Domain object, and which behaviour belongs in a [Use Case](use_case.md).
 
-It is cheaper to specialise Use Cases, resulting in an anemic domain model, then evolve the systems towards generalisations once patterns emerge.
+Use this rule: behaviour in a Domain object must be correct for every Use Case in the system.
 
-In this code we have a simple Domain object
+Specialise Use Cases first. Specialised Use Cases produce an anemic domain model. Move behaviour into a Domain object after the same pattern appears in more than one Use Case.
+
+This code shows a simple Domain object:
 
 ```ruby
 class Light
@@ -25,6 +24,6 @@ end
 
 ## Alternative Names
 
-* Entities 
+* Entities
 
-We stick to the name "Domain"
+Made Tech Flavour Clean Architecture uses the name "Domain".

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Install docker
+- Install Docker.
 
 ## Run tests
 
